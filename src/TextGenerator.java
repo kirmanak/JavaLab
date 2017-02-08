@@ -80,7 +80,7 @@ public class TextGenerator {
             collection.clear();
             collection = new Gson().fromJson(br.readLine(), new TypeToken<Vector<Adults>>(){}.getType());
             br.close();
-            collection.sort((o1, o2) -> o1.getName().compareTo(o2.getName())*(-1));
+            collection.sort((o1, o2) -> o1.toString().compareTo(o2.toString()));
         } catch (IOException | NullPointerException err) {
             System.out.println("Файл ввода не найден. Не буду ничего читать.");
         }
