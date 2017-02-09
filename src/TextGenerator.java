@@ -2,6 +2,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.*;
+import java.util.Comparator;
 import java.util.Scanner;
 import java.util.Vector;
 
@@ -16,38 +17,45 @@ import java.util.Vector;
  */
 
 public class TextGenerator {
-    private static Vector<Adults> collection = new Vector<>();
     private static final File jsonFile = new File(System.getenv("jsonFile"));
+    private static Vector<Adults> collection = new Vector<>();
 
     public static void main(String[] args) {
         load();
+        label:
         while (true) {
             System.out.print("Введите команду:");
             String command = new Scanner(System.in).nextLine();
-            if (command.contains("remove")) {
-                try {
-                    remove(Integer.parseInt(command.substring(7))-1);
-                    System.out.println(Integer.parseInt(command.substring(7)) + " -й элемент удалён.");
-                } catch (NumberFormatException err) {
-                    if (command.equals("remove_last")) remove();
-                    System.out.println("Последний элемент удалён.");
-                }
+            switch (command) {
+                case "exit":
+                    save();
+                    break label;
+                case "print":
+                    print();
+                    break;
+                case "help":
+                    help();
+                    break;
+                case "save":
+                    save();
+                    break;
+                case "load":
+                    load();
+                    break;
+                default:
+                    if (command.contains("remove")) {
+                        remove(command);
+                    } else {
+                        System.out.println("Моя твоя не понимай.");
+                    }
             }
-            if (command.equals("exit")) {
-                save();
-                break;
-            }
-            if (command.equals("load")) load();
-            if (command.equals("save")) save();
-            if (command.equals("help")) help();
-            if (command.equals("print")) print();
         }
     }
 
     /**
      * Печатает содержимое коллекции и количество элементов в ней
      */
-    private static void print () {
+    public static void print() {
         System.out.println("В коллекции " + collection.size() + " элемент(ов)(а):");
         collection.forEach(adult -> System.out.println(adult.toString()));
     }
@@ -65,22 +73,31 @@ public class TextGenerator {
     }
 
     /**
-     * Удаляет последний элемент
+     * Метод, определяющий номер элемента, подлежащего удалению
+     * @param command - строка, содержащая слово "remove" и номер элемента либо _last
      */
-    private static void remove() {
-        remove(collection.size()-1);
+    public static void remove(String command) {
+        try {
+            remove(Integer.parseInt(command.substring(7)) - 1);
+            System.out.println(Integer.parseInt(command.substring(7)) + "-й элемент удалён.");
+        } catch (NumberFormatException | StringIndexOutOfBoundsException err) {
+            if (command.equals("remove_last")) {
+                remove(collection.size() - 1);
+                System.out.println("Последний элемент удалён.");
+            } else System.out.println("Моя твоя не понимай.");
+        }
     }
 
     /**
      * Считывает коллекцию из JSON-файла
      */
-    private static void load () {
+    public static void load() {
         try {
             BufferedReader br = new BufferedReader(new FileReader(jsonFile));
             collection.clear();
             collection = new Gson().fromJson(br.readLine(), new TypeToken<Vector<Adults>>(){}.getType());
             br.close();
-            collection.sort((o1, o2) -> o1.toString().compareTo(o2.toString()));
+            collection.sort(Comparator.comparing(Adults::toString));
         } catch (IOException | NullPointerException err) {
             System.out.println("Файл ввода не найден. Не буду ничего читать.");
         }
@@ -89,7 +106,7 @@ public class TextGenerator {
     /**
      * Записывает коллекцию в JSON-файл.
      */
-    private static void save() {
+    public static void save() {
         try {
             PrintWriter pw = new PrintWriter(new FileWriter(jsonFile));
             pw.flush();
@@ -103,7 +120,7 @@ public class TextGenerator {
     /**
      * Печатает справку по командам приложения
      */
-    private static void help() {
+    public static void help() {
         System.out.println("Я могу:");
         System.out.println("1. remove element - удалить элемент под номером element.");
         System.out.println("2. remove - удалить последний элемент.");
