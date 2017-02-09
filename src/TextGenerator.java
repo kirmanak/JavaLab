@@ -18,6 +18,7 @@ import java.util.Vector;
 
 public class TextGenerator {
     private static final File jsonFile = new File(System.getenv("jsonFile"));
+    private static final Gson gson = new Gson();
     private static Vector<Adults> collection = new Vector<>();
 
     public static void main(String[] args) {
@@ -95,7 +96,8 @@ public class TextGenerator {
         try {
             BufferedReader br = new BufferedReader(new FileReader(jsonFile));
             collection.clear();
-            collection = new Gson().fromJson(br.readLine(), new TypeToken<Vector<Adults>>(){}.getType());
+            collection = gson.fromJson(br.readLine(), new TypeToken<Vector<Adults>>() {
+            }.getType());
             br.close();
             collection.sort(Comparator.comparing(Adults::toString));
         } catch (IOException | NullPointerException err) {
@@ -110,7 +112,7 @@ public class TextGenerator {
         try {
             PrintWriter pw = new PrintWriter(new FileWriter(jsonFile));
             pw.flush();
-            pw.print(new Gson().toJson(collection));
+            pw.print(gson.toJson(collection));
             pw.close();
         } catch (IOException | NullPointerException err) {
             System.out.println("Файл ввода не найден. Не буду ничего писать.");
