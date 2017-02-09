@@ -74,7 +74,7 @@ public class TextGenerator {
 
     /**
      * Метод, определяющий номер элемента, подлежащего удалению
-     * @param command - строка, содержащая слово "remove" и номер элемента либо _last
+     * @param command строка, содержащая слово "remove" и номер элемента либо _last
      */
     public static void remove(String command) {
         try {
