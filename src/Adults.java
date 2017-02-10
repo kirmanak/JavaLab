@@ -1,9 +1,9 @@
-class Adults {
+class Adults implements Comparable {
     private final String name;
-    private String time;
-    private Location location;
     private final String character;
     private final Relative relative;
+    private String time;
+    private Location location;
     private int hash = 0;
 
     public Adults(String name, String character, Location location, String time, Relative relative) {
@@ -52,5 +52,10 @@ class Adults {
             this.hash = this.getName().length() + this.getRelative().toString().length();
         }
         return this.hash;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        return this.toString().compareTo(o.toString());
     }
 }

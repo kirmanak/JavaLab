@@ -2,7 +2,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.*;
-import java.util.Comparator;
 import java.util.Scanner;
 import java.util.Vector;
 
@@ -99,7 +98,6 @@ public class TextGenerator {
             collection = gson.fromJson(br.readLine(), new TypeToken<Vector<Adults>>() {
             }.getType());
             br.close();
-            collection.sort(Comparator.comparing(Adults::toString));
         } catch (IOException | NullPointerException err) {
             System.out.println("Файл ввода не найден. Не буду ничего читать.");
         }
