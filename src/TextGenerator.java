@@ -139,7 +139,7 @@ public class TextGenerator {
             pw.print(gson.toJson(collection));
             pw.close();
         } catch (IOException | NullPointerException err) {
-            System.out.println("Файл ввода не найден. Не буду ничего писать.");
+            System.out.println("Файл вывода не найден. Не буду ничего писать.");
         }
     }
 
