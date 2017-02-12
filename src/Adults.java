@@ -1,3 +1,6 @@
+/**
+ * Взрослые люди относительно Малыша
+ */
 class Adults implements Comparable {
     private final String name;
     private final String character;
@@ -5,6 +8,14 @@ class Adults implements Comparable {
     private String time;
     private Location location;
     private int hash = 0;
+
+    /**
+     * @param name      Имя человека
+     * @param character Характер человека
+     * @param location  Местонахождение человека
+     * @param time      Время, в течение которого он будет там находиться
+     * @param relative  Родственные отношения с Малышом (Father,Mother,Uncle,Sibling)
+     */
 
     public Adults(String name, String character, Location location, String time, Relative relative) {
         this.name = name;
@@ -39,14 +50,13 @@ class Adults implements Comparable {
     }
 
     public boolean equals(Adults adults) {
-        if (this.hashCode() == adults.hashCode()) {
-            return this.getName().equals(adults.getName()) && this.getRelative().equals(adults.getRelative())
-                    && this.getCharacter().equals(adults.getCharacter()) && this.getTime().equals(adults.getTime())
-                    && this.getLocation().equals(adults.getLocation());
-        } else {
-            return false;
-        }
+        return this.hashCode() == adults.hashCode() && this.getName().equals(adults.getName())
+                && this.getRelative().equals(adults.getRelative())
+                && this.getCharacter().equals(adults.getCharacter())
+                && this.getTime().equals(adults.getTime())
+                && this.getLocation().equals(adults.getLocation());
     }
+
     public int hashCode () {
         if (this.hash == 0) {
             this.hash = this.getName().length() + this.getRelative().toString().length();

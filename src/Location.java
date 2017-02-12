@@ -1,6 +1,10 @@
+/**
+ * Местонахождение человека
+ */
 class Location {
     private final String name;
     private int hash = 0;
+
     public Location(String name) {
         this.name = name;
     }
@@ -14,7 +18,7 @@ class Location {
     }
 
     public boolean equals(Location location) {
-        return this.hashCode() == location.hashCode() ? this.getName().equals(location.getName()) : false;
+        return this.hashCode() == location.hashCode() && this.getName().equals(location.getName());
     }
 
     public int hashCode () {

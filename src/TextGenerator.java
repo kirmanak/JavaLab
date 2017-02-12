@@ -55,34 +55,27 @@ public class TextGenerator {
     /**
      * Печатает содержимое коллекции и количество элементов в ней
      */
-    public static void print() {
+    private static void print() {
         System.out.println("В коллекции " + collection.size() + " элемент(ов)(а):");
         collection.forEach(adult -> System.out.println(adult.toString()));
     }
 
     /**
-     * Удаляет элемент на позиции index
-     * @param index позиция удаляемого элемента
-     */
-    private static void remove (int index) {
-        if (index < collection.size() && index >= 0) {
-            collection.remove(index);
-            System.out.println(index + 1 + "-й элемент удалён.");
-        } else {
-            System.out.println("Нет такого элемента.");
-        }
-    }
-
-    /**
-     * Метод, определяющий номер элемента, подлежащего удалению
+     * Удаляет элемент из коллекции
      * @param command строка, содержащая слово "remove" и номер элемента либо _last
      */
-    public static void remove(String command) {
+    private static void remove(String command) {
         try {
-            remove(Integer.parseInt(command.substring(7)) - 1);
+            int index = Integer.parseInt(command.substring(7)) - 1;
+            if (index < collection.size() && index >= 0) {
+                collection.remove(index);
+                System.out.println(index + 1 + "-й элемент удалён.");
+            } else {
+                System.out.println("Нет такого элемента.");
+            }
         } catch (NumberFormatException | StringIndexOutOfBoundsException err) {
             if (command.equals("remove_last")) {
-                remove(collection.size() - 1);
+                remove("remove " + collection.size());
             } else System.out.println("Моя твоя не понимай.");
         }
     }
@@ -90,7 +83,7 @@ public class TextGenerator {
     /**
      * Считывает коллекцию из JSON-файла
      */
-    public static void load() {
+    private static void load() {
         try {
             BufferedReader br = new BufferedReader(new FileReader(jsonFile));
             collection.clear();
@@ -105,7 +98,7 @@ public class TextGenerator {
     /**
      * Записывает коллекцию в JSON-файл.
      */
-    public static void save() {
+    private static void save() {
         try {
             PrintWriter pw = new PrintWriter(new FileWriter(jsonFile));
             pw.flush();
@@ -119,7 +112,7 @@ public class TextGenerator {
     /**
      * Печатает справку по командам приложения
      */
-    public static void help() {
+    private static void help() {
         System.out.println("Я могу:");
         System.out.println("1. remove element - удалить элемент под номером element.");
         System.out.println("2. remove_last - удалить последний элемент.");
