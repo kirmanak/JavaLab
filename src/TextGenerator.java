@@ -67,6 +67,7 @@ public class TextGenerator {
     private static void remove (int index) {
         if (index < collection.size() && index >= 0) {
             collection.remove(index);
+            System.out.println(index + 1 + "-й элемент удалён.");
         } else {
             System.out.println("Нет такого элемента.");
         }
@@ -79,11 +80,9 @@ public class TextGenerator {
     public static void remove(String command) {
         try {
             remove(Integer.parseInt(command.substring(7)) - 1);
-            System.out.println(Integer.parseInt(command.substring(7)) + "-й элемент удалён.");
         } catch (NumberFormatException | StringIndexOutOfBoundsException err) {
             if (command.equals("remove_last")) {
                 remove(collection.size() - 1);
-                System.out.println("Последний элемент удалён.");
             } else System.out.println("Моя твоя не понимай.");
         }
     }
@@ -123,7 +122,7 @@ public class TextGenerator {
     public static void help() {
         System.out.println("Я могу:");
         System.out.println("1. remove element - удалить элемент под номером element.");
-        System.out.println("2. remove - удалить последний элемент.");
+        System.out.println("2. remove_last - удалить последний элемент.");
         System.out.println("3. save - сохранить коллекцию в JSON-файл.");
         System.out.println("4. load - считать коллекцию из JSON-файла.");
         System.out.println("5. print - напечатать коллекцию.");
