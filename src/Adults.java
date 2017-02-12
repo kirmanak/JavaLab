@@ -46,7 +46,9 @@ class Adults implements Comparable {
     }
 
     public String toString() {
-        return this.getRelative().toString() + ' ' + this.getName();
+        return this.getRelative().toString() + " " + this.getName() + " с " + this.getCharacter()
+                + " характером " + " который находится в/на " + this.getLocation().toString()
+                + " в течение " + this.getTime();
     }
 
     public boolean equals(Adults adults) {
