@@ -154,7 +154,7 @@ public class TextGenerator {
         System.out.println("4. load - считать коллекцию из JSON-файла.");
         System.out.println("5. print - напечатать коллекцию.");
         System.out.println("6. exit - сохранить и выйти.");
-        System.out.println("7. help - вызвать эту справку.");
+        System.out.println("7. help - напечатать эту справку.");
         System.out.println("8. add - добавить нового человека.");
     }
 }
