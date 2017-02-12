@@ -13,6 +13,7 @@ import java.util.Vector;
  * print - напечатать содержимое коллекции и количество элементов. <br>
  * exit - сохранить и выйти. <br>
  * help - вызвать эту справку. <br>
+ * add - добавить нового человека
  */
 
 public class TextGenerator {
@@ -42,11 +43,15 @@ public class TextGenerator {
                 case "load":
                     load();
                     break;
+                case "add":
+                    add();
+                    break;
                 default:
                     if (command.contains("remove")) {
                         remove(command);
                     } else {
                         System.out.println("Моя твоя не понимай.");
+                        help();
                     }
             }
         }
@@ -58,6 +63,35 @@ public class TextGenerator {
     private static void print() {
         System.out.println("В коллекции " + collection.size() + " элемент(ов)(а):");
         collection.forEach(adult -> System.out.println(adult.toString()));
+    }
+
+    /**
+     * Добавляет нового человека
+     */
+    private static void add() {
+        System.out.print("Введите имя: ");
+        String name = new Scanner(System.in).nextLine();
+        System.out.print("Введите характер: ");
+        String character = new Scanner(System.in).nextLine();
+        System.out.print("Введите местонахождение: ");
+        String location = new Scanner(System.in).nextLine();
+        System.out.print("Введите время: ");
+        String time = new Scanner(System.in).nextLine();
+        System.out.println("Степени родства: ");
+        for (Relative relative : Relative.values()) {
+            System.out.println(relative);
+        }
+        Adults adult = null;
+        while (adult == null) {
+            System.out.print("Введите степень родства: ");
+            String relative = new Scanner(System.in).nextLine();
+            try {
+                adult = new Adults(name, character, new Location(location), time, Relative.valueOf(relative));
+            } catch (IllegalArgumentException err) {
+                System.err.println("На английском попробуй.");
+            }
+        }
+        collection.add(adult);
     }
 
     /**
@@ -121,5 +155,6 @@ public class TextGenerator {
         System.out.println("5. print - напечатать коллекцию.");
         System.out.println("6. exit - сохранить и выйти.");
         System.out.println("7. help - вызвать эту справку.");
+        System.out.println("8. add - добавить нового человека.");
     }
 }

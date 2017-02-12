@@ -2,24 +2,24 @@
  * Родственные отношения по отношению к Малышу
  */
 enum Relative {
-    father{
+    father {
         public String toString() {
             return "папа";
         }
     },
-    mother{
+    mother {
         public String toString() {
             return "мама";
         }
     },
-    uncle{
+    uncle {
         public String toString() {
             return "дядя";
         }
     },
-    siblings{
+    sibling {
         public String toString() {
-            return "ребёнок";
+            return "сиблинг";
         }
     };
 
