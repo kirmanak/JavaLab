@@ -19,13 +19,14 @@ import java.util.Vector;
 public class TextGenerator {
     private static final String jsonFile = System.getenv("jsonFile");
     private static final Gson gson = new Gson();
+    private static final Scanner scanner = new Scanner(System.in);
     private static Vector<Adults> collection = new Vector<>();
 
     public static void main(String[] args) {
         load();
         while (true) {
             System.out.print("Введите команду:");
-            String command = new Scanner(System.in).nextLine();
+            String command = scanner.nextLine();
             switch (command) {
                 case "exit":
                     save();
@@ -49,7 +50,7 @@ public class TextGenerator {
                     if (command.contains("remove")) {
                         remove(command);
                     } else {
-                        System.out.println("Моя твоя не понимай.");
+                        System.err.println("Моя твоя не понимай.");
                         help();
                     }
             }
@@ -69,13 +70,13 @@ public class TextGenerator {
      */
     private static void add() {
         System.out.print("Введите имя: ");
-        String name = new Scanner(System.in).nextLine();
+        String name = scanner.nextLine();
         System.out.print("Введите характер: ");
-        String character = new Scanner(System.in).nextLine();
+        String character = scanner.nextLine();
         System.out.print("Введите местонахождение: ");
-        String location = new Scanner(System.in).nextLine();
+        String location = scanner.nextLine();
         System.out.print("Введите время: ");
-        String time = new Scanner(System.in).nextLine();
+        String time = scanner.nextLine();
         System.out.println("Степени родства: ");
         for (Relative relative : Relative.values()) {
             System.out.println(relative);
@@ -83,7 +84,7 @@ public class TextGenerator {
         Adults adult = null;
         while (adult == null) {
             System.out.print("Введите степень родства: ");
-            String relative = new Scanner(System.in).nextLine();
+            String relative = scanner.nextLine();
             try {
                 adult = new Adults(name, character, new Location(location), time, Relative.valueOf(relative));
             } catch (IllegalArgumentException err) {
@@ -109,7 +110,7 @@ public class TextGenerator {
         } catch (NumberFormatException | StringIndexOutOfBoundsException err) {
             if (command.equals("remove_last")) {
                 remove("remove " + collection.size());
-            } else System.out.println("Моя твоя не понимай.");
+            } else System.err.println("Моя твоя не понимай.");
         }
     }
 
@@ -121,9 +122,9 @@ public class TextGenerator {
             collection.clear();
             collection = gson.fromJson(br.readLine(), new TypeToken<Vector<Adults>>() {
             }.getType());
-            System.out.println(collection.getClass());
+            collection.sort(null);
         } catch (IOException | NullPointerException err) {
-            System.out.println("Файл ввода не найден. Не буду ничего читать.");
+            System.err.println("Файл ввода не найден. Не буду ничего читать.");
         }
     }
 
@@ -135,7 +136,7 @@ public class TextGenerator {
             pw.flush();
             pw.print(gson.toJson(collection));
         } catch (IOException | NullPointerException err) {
-            System.out.println("Файл вывода не найден. Не буду ничего писать.");
+            System.err.println("Файл вывода не найден. Не буду ничего писать.");
         }
     }
 
