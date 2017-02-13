@@ -17,20 +17,19 @@ import java.util.Vector;
  */
 
 public class TextGenerator {
-    private static final File jsonFile = new File(System.getenv("jsonFile"));
+    private static final String jsonFile = System.getenv("jsonFile");
     private static final Gson gson = new Gson();
     private static Vector<Adults> collection = new Vector<>();
 
     public static void main(String[] args) {
         load();
-        label:
         while (true) {
             System.out.print("Введите команду:");
             String command = new Scanner(System.in).nextLine();
             switch (command) {
                 case "exit":
                     save();
-                    break label;
+                    System.exit(0);
                 case "print":
                     print();
                     break;
@@ -118,12 +117,11 @@ public class TextGenerator {
      * Считывает коллекцию из JSON-файла
      */
     private static void load() {
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(jsonFile));
+        try (BufferedReader br = new BufferedReader(new FileReader(jsonFile))) {
             collection.clear();
             collection = gson.fromJson(br.readLine(), new TypeToken<Vector<Adults>>() {
             }.getType());
-            br.close();
+            System.out.println(collection.getClass());
         } catch (IOException | NullPointerException err) {
             System.out.println("Файл ввода не найден. Не буду ничего читать.");
         }
@@ -133,11 +131,9 @@ public class TextGenerator {
      * Записывает коллекцию в JSON-файл.
      */
     private static void save() {
-        try {
-            PrintWriter pw = new PrintWriter(new FileWriter(jsonFile));
+        try (PrintWriter pw = new PrintWriter(new File(jsonFile))) {
             pw.flush();
             pw.print(gson.toJson(collection));
-            pw.close();
         } catch (IOException | NullPointerException err) {
             System.out.println("Файл вывода не найден. Не буду ничего писать.");
         }
