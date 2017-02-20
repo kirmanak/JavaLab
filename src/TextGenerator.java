@@ -120,9 +120,14 @@ public class TextGenerator {
     private static void load() {
         try (BufferedReader br = new BufferedReader(new FileReader(jsonFile))) {
             collection.clear();
-            collection = gson.fromJson(br.readLine(), new TypeToken<Vector<Adults>>() {
-            }.getType());
-            collection.sort(null);
+            String read = br.readLine();
+            while (read != null) {
+                /*collection = gson.fromJson(br.readLine(), new TypeToken<Vector<Adults>>() {
+                }.getType());*/
+                collection.add(gson.fromJson(read, new TypeToken<Adults>() {
+                }.getType()));
+                read = br.readLine();
+            }
         } catch (IOException | NullPointerException err) {
             System.err.println("Файл ввода не найден. Не буду ничего читать.");
         }
@@ -134,7 +139,8 @@ public class TextGenerator {
     private static void save() {
         try (PrintWriter pw = new PrintWriter(new File(jsonFile))) {
             pw.flush();
-            pw.print(gson.toJson(collection));
+            collection.forEach(adults -> pw.println(gson.toJson(adults)));
+            //pw.print(gson.toJson(collection));
         } catch (IOException | NullPointerException err) {
             System.err.println("Файл вывода не найден. Не буду ничего писать.");
         }
