@@ -50,8 +50,7 @@ public class TextGenerator {
                     if (command.contains("remove")) {
                         remove(command);
                     } else {
-                        System.err.println("Моя твоя не понимай.");
-                        help();
+                        System.err.println("Моя твоя не понимай. Можешь написать \"help\".");
                     }
             }
         }
@@ -119,15 +118,12 @@ public class TextGenerator {
      */
     private static void load() {
         try (BufferedReader br = new BufferedReader(new FileReader(jsonFile))) {
-            collection.clear();
             String read = br.readLine();
-            while (read != null) {
-                /*collection = gson.fromJson(br.readLine(), new TypeToken<Vector<Adults>>() {
-                }.getType());*/
-                collection.add(gson.fromJson(read, new TypeToken<Adults>() {
-                }.getType()));
-                read = br.readLine();
-            }
+            if (!(read == null || read.equals("null") || read.equals(""))) {
+                collection.clear();
+                collection = gson.fromJson(read, new TypeToken<Vector<Adults>>() {
+                }.getType());
+            } else System.out.println("Файл пуст");
         } catch (IOException | NullPointerException err) {
             System.err.println("Файл ввода не найден. Не буду ничего читать.");
         }
@@ -139,8 +135,7 @@ public class TextGenerator {
     private static void save() {
         try (PrintWriter pw = new PrintWriter(new File(jsonFile))) {
             pw.flush();
-            collection.forEach(adults -> pw.println(gson.toJson(adults)));
-            //pw.print(gson.toJson(collection));
+            pw.print(gson.toJson(collection));
         } catch (IOException | NullPointerException err) {
             System.err.println("Файл вывода не найден. Не буду ничего писать.");
         }
