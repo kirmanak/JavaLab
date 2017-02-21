@@ -120,7 +120,7 @@ public class TextGenerator {
     private static void load() {
         try (BufferedReader br = new BufferedReader(new FileReader(jsonFile))) {
             String read = br.readLine();
-            if (!(read == null || read.equals("null") || read.equals(""))) {
+            if (!(read == null || read.equals("null") || read.isEmpty())) {
                 collection.clear();
                 collection = gson.fromJson(read, new TypeToken<Vector<Adults>>() {
                 }.getType());
