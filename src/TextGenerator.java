@@ -78,8 +78,9 @@ public class TextGenerator {
         String time = scanner.nextLine();
         System.out.println("Степени родства: ");
         for (Relative relative : Relative.values()) {
-            System.out.println(relative);
+            System.out.print(relative + " ");
         }
+        System.out.println();
         Adults adult = null;
         while (adult == null) {
             System.out.print("Введите степень родства: ");
@@ -87,7 +88,7 @@ public class TextGenerator {
             try {
                 adult = new Adults(name, character, new Location(location), time, Relative.valueOf(relative));
             } catch (IllegalArgumentException err) {
-                System.err.println("На английском попробуй.");
+                System.err.println("Не могу понять. Если что, надо на английском.");
             }
         }
         collection.add(adult);
