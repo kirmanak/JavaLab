@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 /**
  * EntryPoint, читающий консоль, чтобы определить команду, подлежащую выполнению.
+ * Работает с файлом, записанным в переменную окружения под названием jsonFile.
  */
 
 public class TextGenerator {
