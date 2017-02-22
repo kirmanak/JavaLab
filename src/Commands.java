@@ -5,7 +5,7 @@ import java.io.*;
 import java.util.Vector;
 
 /**
- * Enumation команд, использующихся в программе
+ * Enumeration команд, использующихся в программе
  */
 enum Commands {
     /**
