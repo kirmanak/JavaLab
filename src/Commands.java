@@ -61,7 +61,7 @@ enum Commands {
                 pw.flush();
                 pw.print(TextGenerator.gson.toJson(TextGenerator.collection));
             } catch (IOException | NullPointerException err) {
-                System.err.println("Файл вывода не найден. Не буду ничего писать.");
+                System.err.println("Файл вывода не найден. Не буду ничего писать. $fileJson = " + TextGenerator.jsonFile);
             }
         }
     },
@@ -85,7 +85,7 @@ enum Commands {
                     }
                 } else System.out.println("Файл пуст");
             } catch (IOException | NullPointerException err) {
-                System.err.println("Файл ввода не найден. Не буду ничего читать.");
+                System.err.println("Файл ввода не найден. Не буду ничего читать. $fileJson = " + TextGenerator.jsonFile);
             }
         }
     },

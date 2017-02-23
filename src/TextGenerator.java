@@ -26,7 +26,7 @@ public class TextGenerator {
             if (command.matches(removeRegexp.pattern())) { //если это remove
                 if (command.matches(removeLastRegexp.pattern())) { //если это remove_last (или похожая)
                     Commands.remove.doIt(collection.size());
-                } else { //если это remove element
+                } else { //если это remove element (или похожая)
                     int index = -1;
                     for (String str : Pattern.compile("[^0-9]").split(command)) {
                         try {
@@ -39,7 +39,7 @@ public class TextGenerator {
                 }
             } else { //если это не remove
                 try {
-                    Commands.valueOf(command).doIt();
+                    Commands.valueOf(command.replaceAll(" ", "")).doIt();
                 } catch (IllegalArgumentException err) {
                     System.err.println("Моя твоя не понимай. Попробуй написать " + Commands.help.name());
                 }
