@@ -76,8 +76,7 @@ enum Commands {
         public void doIt() {
             try (BufferedReader br = new BufferedReader(new FileReader(TextGenerator.jsonFile))) {
                 String read = br.readLine();
-                if (!(read == null || read.equals("null") || read.isEmpty())) {
-                    TextGenerator.collection.clear();
+                if (!(read == null || read.isEmpty())) {
                     try {
                         TextGenerator.collection = TextGenerator.gson.fromJson(read, new TypeToken<Vector<Adults>>() {
                         }.getType());

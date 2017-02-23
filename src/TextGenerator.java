@@ -13,7 +13,7 @@ public class TextGenerator {
     static final String jsonFile = System.getenv("jsonFile");
     static final Gson gson = new Gson();
     static final Scanner scanner = new Scanner(System.in);
-    private static final Pattern removeLastRegexp = Pattern.compile(" *" + Commands.remove.name() + " *_ *last *");
+    private static final Pattern removeLastRegexp = Pattern.compile(" *" + Commands.remove.name() + "_last *");
     private static final Pattern removeRegexp = Pattern.compile(removeLastRegexp.pattern() + "| *" + Commands.remove.name() + " *\\d+ *");
     static Vector<Adults> collection = new Vector<>();
 
@@ -27,15 +27,15 @@ public class TextGenerator {
                 if (command.matches(removeLastRegexp.pattern())) { //если это remove_last (или похожая)
                     Commands.remove.doIt(collection.size());
                 } else { //если это remove element
-                    String index = "";
-                    for (char a : command.toCharArray()) {
-                        if ((a >= '0') && (a <= '9')) index += a; //parseInt не может в отбрасывание лишнего
+                    int index = -1;
+                    for (String str : Pattern.compile("[^0-9]").split(command)) {
+                        try {
+                            index = Integer.parseInt(str);
+                            break;
+                        } catch (NumberFormatException err) {
+                        }
                     }
-                    try {
-                        Commands.remove.doIt(Integer.parseInt(index));
-                    } catch (NumberFormatException err) {
-                        System.err.println("Не могу понять, что за число.");
-                    }
+                    Commands.remove.doIt(index);
                 }
             } else { //если это не remove
                 try {
