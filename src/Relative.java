@@ -1,5 +1,5 @@
 /**
- * Родственные отношения по отношению к Малышу
+ * Отношения с Малышом
  */
 enum Relative {
     father {
@@ -21,7 +21,12 @@ enum Relative {
         public String toString() {
             return "сиблинг";
         }
-    };
+    },
+    housewife {
+        public String toString() {
+            return "домработница";
+        }
+    },;
 
     public boolean equals(Relative relative) {
         return this.hashCode() == relative.hashCode() && this.toString().equals(relative.toString());

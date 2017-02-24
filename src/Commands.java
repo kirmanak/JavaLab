@@ -175,18 +175,47 @@ enum Commands {
             }
         }
     };
+    /**
+     * Переменная с именем файла, в котором хранится коллекция
+     */
     private static final String jsonFile = System.getenv("jsonFile");
+    /**
+     * Служебная переменная для работы с файлом
+     */
     private static final Gson gson = new Gson();
-    private static final String[] names = {"Папа", "Мама", "Юлиус", "Хильдур Бок", "Филле", "Рулле"};
+    /**
+     * "Коллекция" имён для генератора
+     */
+    private static final String[] names = {"Папа", "Мама", "Юлиус", "Боссе", "Бетан", "Хильдур Бок"};
+    /**
+     * "Коллекция" мест для генератора
+     */
     private static final String[] locations = {"дома", "на крыше", "на улице", "у бабушки"};
-    private static final String[] times = {"ещё чуть-чуть", "на каникулы", "весь отпуск", "день", "неделю"};
+    /**
+     * "Коллекция" времён для генератора (как долго персонаж будет в этом месте)
+     */
+    private static final String[] times = {"вечно", "на каникулы", "весь отпуск", "день", "неделю"};
+    /**
+     * "Коллекция" характеров
+     */
     private static final String[] characters = {"твёрдым", "мягким", "игривым", "тяжёлым", "весёлым"};
+    /**
+     * Служебная переменная рандомайзер для генератора
+     */
     private static final Random randomize = new Random();
 
+    /**
+     * Метод, который вызывается у управляющих команд без параметра
+     */
     public void doIt() {
         System.err.println("Что-то пошло не так.");
     }
 
+    /**
+     * Метод, вызывающийся у управляющих команд с параметром
+     *
+     * @param i параметр, передающийся команде
+     */
     public void doIt(int i) {
         System.err.println("Что-то пошло не так.");
     }

@@ -8,9 +8,21 @@ import java.util.regex.Pattern;
  */
 
 public class TextGenerator {
+    /**
+     * Служебная переменная, служащая для чтения командной строки
+     */
     static final Scanner scanner = new Scanner(System.in);
+    /**
+     * Регулярное выражение для команды remove_last
+     */
     private static final Pattern removeLastRegexp = Pattern.compile(" *" + Commands.remove.name() + "_last *");
+    /**
+     * Регулярное выражение для команд с параметром
+     */
     private static final Pattern elements = Pattern.compile(" *" + Commands.generate.name() + " *\\d+ *| *" + Commands.remove.name() + " *\\d+ *");
+    /**
+     * Сама коллекция
+     */
     static Vector<Adults> collection = new Vector<>();
 
     public static void main(String[] args) {
