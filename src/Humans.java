@@ -2,10 +2,25 @@
  * Люди как-то связанные с Малышом
  */
 class Humans implements Comparable<Humans> {
+    /**
+     * Имя
+     */
     private final String name;
+    /**
+     * Характер
+     */
     private final String character;
+    /**
+     * Его отношения с малышом
+     */
     private final Relative relative;
+    /**
+     * Как долго человек будет находится в этом месте
+     */
     private String time;
+    /**
+     * Место, в котором находится человек
+     */
     private Location location;
     private int hash = 0;
 
@@ -14,7 +29,7 @@ class Humans implements Comparable<Humans> {
      * @param character Характер человека
      * @param location  Местонахождение человека
      * @param time      Время, в течение которого он будет там находиться
-     * @param relative  Родственные отношения с Малышом (Father,Mother,Uncle,Sibling)
+     * @param relative  Отношения с Малышом
      */
 
     public Humans(String name, String character, Location location, String time, Relative relative) {
