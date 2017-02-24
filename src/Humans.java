@@ -1,7 +1,7 @@
 /**
- * Взрослые люди относительно Малыша
+ * Люди как-то связанные с Малышом
  */
-class Adults implements Comparable<Adults> {
+class Humans implements Comparable<Humans> {
     private final String name;
     private final String character;
     private final Relative relative;
@@ -17,7 +17,7 @@ class Adults implements Comparable<Adults> {
      * @param relative  Родственные отношения с Малышом (Father,Mother,Uncle,Sibling)
      */
 
-    public Adults(String name, String character, Location location, String time, Relative relative) {
+    public Humans(String name, String character, Location location, String time, Relative relative) {
         this.name = name;
         this.location = location;
         this.relative = relative;
@@ -50,8 +50,8 @@ class Adults implements Comparable<Adults> {
                 + " характером, который находится " + this.getLocation().toString() + " " + this.getTime();
     }
 
-    public boolean equals(Adults adults) {
-        return this.hashCode() == adults.hashCode() && this.toString().equals(adults.toString());
+    public boolean equals(Humans humans) {
+        return this.hashCode() == humans.hashCode() && this.toString().equals(humans.toString());
     }
 
     public int hashCode () {
@@ -62,7 +62,7 @@ class Adults implements Comparable<Adults> {
     }
 
     @Override
-    public int compareTo(Adults adult) {
+    public int compareTo(Humans adult) {
         return this.toString().compareTo(adult.toString());
     }
 }

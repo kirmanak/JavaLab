@@ -80,7 +80,7 @@ enum Commands {
                 String read = br.readLine();
                 if (!(read == null || read.isEmpty())) {
                     try {
-                        TextGenerator.collection = gson.fromJson(read, new TypeToken<Vector<Adults>>() {
+                        TextGenerator.collection = gson.fromJson(read, new TypeToken<Vector<Humans>>() {
                         }.getType());
                     } catch (JsonSyntaxException err) {
                         System.err.println("Ошибка чтения коллекции из файла.");
@@ -101,7 +101,7 @@ enum Commands {
 
         public void doIt() {
             System.out.println("В коллекции " + TextGenerator.collection.size() + " элемент(ов)(а):");
-            TextGenerator.collection.forEach(adult -> System.out.println(adult.toString()));
+            TextGenerator.collection.forEach(human -> System.out.println(human.toString()));
         }
     },
     /**
@@ -138,30 +138,30 @@ enum Commands {
                 System.out.print(relative.name() + " ");
             }
             System.out.println();
-            Adults adult = null;
-            while (adult == null) {
+            Humans human = null;
+            while (human == null) {
                 System.out.print("Введите степень родства: ");
                 String relative = TextGenerator.scanner.nextLine();
                 try {
-                    adult = new Adults(name, character, new Location(location), time, Relative.valueOf(relative));
+                    human = new Humans(name, character, new Location(location), time, Relative.valueOf(relative));
                 } catch (IllegalArgumentException err) {
                     System.err.println("Не могу понять. Если что, надо на английском.");
                 }
             }
-            TextGenerator.collection.add(adult);
+            TextGenerator.collection.add(human);
         }
     },
     /**
      * Генерирует новых людей
      */
     generate {
-        private Adults generate() {
+        private Humans generate() {
             String name = names[randomize.nextInt(names.length)];
             String time = times[randomize.nextInt(times.length)];
             String character = characters[randomize.nextInt(characters.length)];
             Location location = new Location(locations[randomize.nextInt(locations.length)]);
             Relative relative = Relative.values()[randomize.nextInt(Relative.values().length)];
-            return new Adults(name, character, location, time, relative);
+            return new Humans(name, character, location, time, relative);
         }
 
         public void doIt(int amountOfElements) {

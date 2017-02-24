@@ -23,7 +23,7 @@ public class TextGenerator {
     /**
      * Сама коллекция
      */
-    static Vector<Adults> collection = new Vector<>();
+    static Vector<Humans> collection = new Vector<>();
 
     public static void main(String[] args) {
         Runtime.getRuntime().addShutdownHook(new Thread(Commands.save::doIt));
