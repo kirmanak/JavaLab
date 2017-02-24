@@ -1,3 +1,4 @@
+import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
@@ -57,11 +58,11 @@ enum Commands {
         }
 
         public void doIt() {
-            try (PrintWriter pw = new PrintWriter(new File(TextGenerator.jsonFile))) {
+            try (PrintWriter pw = new PrintWriter(new File(jsonFile))) {
                 pw.flush();
-                pw.print(TextGenerator.gson.toJson(TextGenerator.collection));
+                pw.print(gson.toJson(TextGenerator.collection));
             } catch (IOException | NullPointerException err) {
-                System.err.println("Файл вывода не найден. Не буду ничего писать. $fileJson = " + TextGenerator.jsonFile);
+                System.err.println("Файл вывода не найден. Не буду ничего писать. $fileJson = " + jsonFile);
             }
         }
     },
@@ -74,18 +75,18 @@ enum Commands {
         }
 
         public void doIt() {
-            try (BufferedReader br = new BufferedReader(new FileReader(TextGenerator.jsonFile))) {
+            try (BufferedReader br = new BufferedReader(new FileReader(jsonFile))) {
                 String read = br.readLine();
                 if (!(read == null || read.isEmpty())) {
                     try {
-                        TextGenerator.collection = TextGenerator.gson.fromJson(read, new TypeToken<Vector<Adults>>() {
+                        TextGenerator.collection = gson.fromJson(read, new TypeToken<Vector<Adults>>() {
                         }.getType());
                     } catch (JsonSyntaxException err) {
                         System.err.println("Ошибка чтения коллекции из файла.");
                     }
                 } else System.out.println("Файл пуст");
             } catch (IOException | NullPointerException err) {
-                System.err.println("Файл ввода не найден. Не буду ничего читать. $fileJson = " + TextGenerator.jsonFile);
+                System.err.println("Файл ввода не найден. Не буду ничего читать. $fileJson = " + jsonFile);
             }
         }
     },
@@ -149,6 +150,8 @@ enum Commands {
             TextGenerator.collection.add(adult);
         }
     };
+    static final String jsonFile = System.getenv("jsonFile");
+    static final Gson gson = new Gson();
 
     public void doIt() {
         System.err.println("Что-то пошло не так.");

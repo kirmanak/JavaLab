@@ -1,5 +1,3 @@
-import com.google.gson.Gson;
-
 import java.util.Scanner;
 import java.util.Vector;
 import java.util.regex.Pattern;
@@ -10,8 +8,6 @@ import java.util.regex.Pattern;
  */
 
 public class TextGenerator {
-    static final String jsonFile = System.getenv("jsonFile");
-    static final Gson gson = new Gson();
     static final Scanner scanner = new Scanner(System.in);
     private static final Pattern removeLastRegexp = Pattern.compile(" *" + Commands.remove.name() + "_last *");
     private static final Pattern removeRegexp = Pattern.compile(removeLastRegexp.pattern() + "| *" + Commands.remove.name() + " *\\d+ *");
@@ -32,7 +28,7 @@ public class TextGenerator {
                         try {
                             index = Integer.parseInt(str);
                             break;
-                        } catch (NumberFormatException err) {
+                        } catch (NumberFormatException ignored) {
                         }
                     }
                     Commands.remove.doIt(index);

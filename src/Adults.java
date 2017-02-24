@@ -1,7 +1,7 @@
 /**
  * Взрослые люди относительно Малыша
  */
-class Adults implements Comparable {
+class Adults implements Comparable<Adults> {
     private final String name;
     private final String character;
     private final Relative relative;
@@ -66,7 +66,7 @@ class Adults implements Comparable {
     }
 
     @Override
-    public int compareTo(Object o) {
-        return this.toString().compareTo(o.toString());
+    public int compareTo(Adults adult) {
+        return this.getName().compareTo(adult.getName());
     }
 }
