@@ -51,11 +51,7 @@ class Adults implements Comparable<Adults> {
     }
 
     public boolean equals(Adults adults) {
-        return this.hashCode() == adults.hashCode() && this.getName().equals(adults.getName())
-                && this.getRelative().equals(adults.getRelative())
-                && this.getCharacter().equals(adults.getCharacter())
-                && this.getTime().equals(adults.getTime())
-                && this.getLocation().equals(adults.getLocation());
+        return this.hashCode() == adults.hashCode() && this.toString().equals(adults.toString());
     }
 
     public int hashCode () {
@@ -67,6 +63,6 @@ class Adults implements Comparable<Adults> {
 
     @Override
     public int compareTo(Adults adult) {
-        return this.getName().compareTo(adult.getName());
+        return this.toString().compareTo(adult.toString());
     }
 }

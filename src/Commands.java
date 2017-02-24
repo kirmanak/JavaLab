@@ -3,6 +3,7 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.*;
+import java.util.Random;
 import java.util.Vector;
 
 /**
@@ -149,9 +150,34 @@ enum Commands {
             }
             TextGenerator.collection.add(adult);
         }
+    },
+    /**
+     * Генерирует новых людей
+     */
+    generate {
+        private Adults generate() {
+            String name = names[randomizer.nextInt(names.length)];
+            String time = times[randomizer.nextInt(times.length)];
+            String character = characters[randomizer.nextInt(characters.length)];
+            Location location = new Location(locations[randomizer.nextInt(locations.length)]);
+            Relative relative = Relative.values()[randomizer.nextInt(Relative.values().length)];
+            return new Adults(name, character, location, time, relative);
+        }
+
+        public void doIt(int amountOfElements) {
+            for (int i = 0; i < amountOfElements; i++) {
+                TextGenerator.collection.add(generate());
+            }
+            System.out.println("Сгенерировал " + amountOfElements + " элементов.");
+        }
     };
-    static final String jsonFile = System.getenv("jsonFile");
-    static final Gson gson = new Gson();
+    private static final String jsonFile = System.getenv("jsonFile");
+    private static final Gson gson = new Gson();
+    private static final String[] names = {"Папа", "Мама", "Юлиус", "Хильдур Бок", "Филле", "Рулле"};
+    private static final String[] locations = {"дома", "на крыше", "на улице", "у бабушки"};
+    private static final String[] times = {"ещё чуть-чуть", "на каникулы", "весь отпуск", "день", "неделю"};
+    private static final String[] characters = {"твёрдым", "мягким", "игривым", "тяжёлым", "весёлым"};
+    private static final Random randomizer = new Random();
 
     public void doIt() {
         System.err.println("Что-то пошло не так.");
