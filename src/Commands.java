@@ -156,19 +156,23 @@ enum Commands {
      */
     generate {
         private Adults generate() {
-            String name = names[randomizer.nextInt(names.length)];
-            String time = times[randomizer.nextInt(times.length)];
-            String character = characters[randomizer.nextInt(characters.length)];
-            Location location = new Location(locations[randomizer.nextInt(locations.length)]);
-            Relative relative = Relative.values()[randomizer.nextInt(Relative.values().length)];
+            String name = names[randomize.nextInt(names.length)];
+            String time = times[randomize.nextInt(times.length)];
+            String character = characters[randomize.nextInt(characters.length)];
+            Location location = new Location(locations[randomize.nextInt(locations.length)]);
+            Relative relative = Relative.values()[randomize.nextInt(Relative.values().length)];
             return new Adults(name, character, location, time, relative);
         }
 
         public void doIt(int amountOfElements) {
-            for (int i = 0; i < amountOfElements; i++) {
-                TextGenerator.collection.add(generate());
+            if (amountOfElements >= 0 && amountOfElements <= 100) {
+                for (int i = 0; i < amountOfElements; i++) {
+                    TextGenerator.collection.add(generate());
+                }
+                System.out.println("Сгенерировал " + amountOfElements + " элементов.");
+            } else {
+                System.err.println("Кажется, ты ошибся в количестве элементов. Я работаю с числами в диапозоне [0;100].");
             }
-            System.out.println("Сгенерировал " + amountOfElements + " элементов.");
         }
     };
     private static final String jsonFile = System.getenv("jsonFile");
@@ -177,7 +181,7 @@ enum Commands {
     private static final String[] locations = {"дома", "на крыше", "на улице", "у бабушки"};
     private static final String[] times = {"ещё чуть-чуть", "на каникулы", "весь отпуск", "день", "неделю"};
     private static final String[] characters = {"твёрдым", "мягким", "игривым", "тяжёлым", "весёлым"};
-    private static final Random randomizer = new Random();
+    private static final Random randomize = new Random();
 
     public void doIt() {
         System.err.println("Что-то пошло не так.");
