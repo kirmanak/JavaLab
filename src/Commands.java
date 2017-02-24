@@ -164,6 +164,10 @@ enum Commands {
             return new Humans(name, character, location, time, relative);
         }
 
+        public void doIt() {
+            System.err.println("Нужно количество элементов, которое нужно сгенерировать.");
+        }
+
         public void doIt(int amountOfElements) {
             if (amountOfElements >= 0 && amountOfElements <= 100) {
                 for (int i = 0; i < amountOfElements; i++) {
