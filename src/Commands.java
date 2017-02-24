@@ -165,7 +165,7 @@ enum Commands {
         }
 
         public void doIt() {
-            System.err.println("Нужно количество элементов, которое нужно сгенерировать.");
+            System.err.println("Нужно указать количество элементов, которое нужно сгенерировать.");
         }
 
         public void doIt(int amountOfElements) {
