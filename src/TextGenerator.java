@@ -19,10 +19,9 @@ public class TextGenerator {
     /**
      * Регулярное выражение для команд с параметром
      */
-    private static final Pattern elements = Pattern.compile(" *" + Commands.generate.name() + " *\\d+ *| *" + Commands.remove.name() + " *\\d+ *");
-    /**
-     * Сама коллекция
-     */
+    private static final Pattern elements = Pattern.compile(" *" + Commands.generate.name() +
+            " *\\d+ *| *" + Commands.remove.name() + " *\\d+ *");
+    /** Сама коллекция  */
     static Vector<Humans> collection = new Vector<>();
 
     public static void main(String[] args) {
@@ -31,25 +30,32 @@ public class TextGenerator {
         while (true) {
             System.out.print("Введите команду: ");
             String command = scanner.nextLine();
-            if (command.matches(removeLastRegexp.pattern())) Commands.remove.doIt(collection.size());
-            else {
-                if (command.matches(elements.pattern())) { //если это команда, работающая с номером(количеством)
-                    int i = -1;
-                    for (String str : Pattern.compile("[^0-9]").split(command)) {
-                        try {
-                            i = Integer.parseInt(str);
-                            break;
-                        } catch (NumberFormatException ignored) {
-                        }
-                    }
-                    if (command.matches(" *" + Commands.generate.name() + " *\\d+ *")) Commands.generate.doIt(i);
-                    else Commands.remove.doIt(i);
-                } else { //если это команда без параметров
+            new Thread(() -> decodeCommand(command)).start();
+        }
+    }
+
+    /**
+     * Метод, декодирующий команду (и отправляющий её на исполнение)
+     */
+    private static void decodeCommand(String command) {
+        if (command.matches(removeLastRegexp.pattern())) Commands.remove.doIt(collection.size());
+        else {
+            if (command.matches(elements.pattern())) { //если это команда, работающая с номером(количеством)
+                int i = -1;
+                for (String str : Pattern.compile("[^0-9]").split(command)) {
                     try {
-                        Commands.valueOf(command.replaceAll(" ", "")).doIt();
-                    } catch (IllegalArgumentException err) {
-                        System.err.println("Моя твоя не понимай. Попробуй написать " + Commands.help.name());
+                        i = Integer.parseInt(str);
+                        break;
+                    } catch (NumberFormatException ignored) {
                     }
+                }
+                if (command.matches(" *" + Commands.generate.name() + " *\\d+ *")) Commands.generate.doIt(i);
+                else Commands.remove.doIt(i);
+            } else { //если это команда без параметров
+                try {
+                    Commands.valueOf(command.replaceAll(" ", "")).doIt();
+                } catch (IllegalArgumentException err) {
+                    System.err.println("Моя твоя не понимай. Попробуй написать " + Commands.help.name());
                 }
             }
         }

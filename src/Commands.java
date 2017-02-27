@@ -10,9 +10,7 @@ import java.util.Vector;
  * Enumeration команд, использующихся в программе
  */
 enum Commands {
-    /**
-     * Удаляет элемент из коллекции
-     */
+    /** Удаляет элемент из коллекции */
     remove {
         public String toString() {
             return "remove element - удалить элемент под номером element.\nremove_last - удалить последний элемент.\n";
@@ -32,9 +30,7 @@ enum Commands {
             System.err.println("Нужен номер элемента.");
         }
     },
-    /**
-     * Печатает справку по командам приложения
-     */
+    /** Печатает справку по командам приложения */
     help {
         public String toString() {
             String help = "Я могу следующее:\nhelp - напечатать эту справку.";
@@ -50,9 +46,7 @@ enum Commands {
             System.out.println(toString());
         }
     },
-    /**
-     * Записывает коллекцию в JSON-файл.
-     */
+    /** Записывает коллекцию в JSON-файл. */
     save {
         public String toString() {
             return "save - сохранить коллекцию в JSON-файл.\n";
@@ -67,9 +61,7 @@ enum Commands {
             }
         }
     },
-    /**
-     * Считывает коллекцию из JSON-файла
-     */
+    /** Считывает коллекцию из JSON-файла */
     load {
         public String toString() {
             return "load - считать коллекцию из JSON-файла.\n";
@@ -91,9 +83,7 @@ enum Commands {
             }
         }
     },
-    /**
-     * Печатает содержимое коллекции и количество элементов в ней
-     */
+    /** Печатает содержимое коллекции и количество элементов в ней */
     print {
         public String toString() {
             return "print - напечатать коллекцию.\n";
@@ -104,9 +94,7 @@ enum Commands {
             TextGenerator.collection.forEach(human -> System.out.println(human.toString()));
         }
     },
-    /**
-     * Выход из программы
-     */
+    /** Выход из программы */
     exit {
         public String toString() {
             return "exit - сохранить и выйти.\n";
@@ -116,9 +104,7 @@ enum Commands {
             System.exit(0);
         }
     },
-    /**
-     * Добавляет нового человека
-     */
+    /** Добавляет нового человека */
     add {
         public String toString() {
             return "add - добавить нового человека.\n";
@@ -151,10 +137,13 @@ enum Commands {
             TextGenerator.collection.add(human);
         }
     },
-    /**
-     * Генерирует новых людей
-     */
+    /** Генерирует новых людей */
     generate {
+        public String toString() {
+            return "generate - сгенерировать нового человека на основе данных, заложенных разработчиком" +
+                    "(может быть довольно весело)";
+        }
+
         private Humans generate() {
             String name = names[randomize.nextInt(names.length)];
             String time = times[randomize.nextInt(times.length)];
@@ -179,45 +168,34 @@ enum Commands {
             }
         }
     };
-    /**
-     * Переменная с именем файла, в котором хранится коллекция
-     */
+
+    /** Переменная с именем файла, в котором хранится коллекция */
     private static final String jsonFile = System.getenv("jsonFile");
-    /**
-     * Служебная переменная для работы с файлом
-     */
+
+    /** Служебная переменная для работы с файлом */
     private static final Gson gson = new Gson();
-    /**
-     * "Коллекция" имён для генератора
-     */
+
+    /** "Коллекция" имён для генератора */
     private static final String[] names = {"Папа", "Мама", "Юлиус", "Боссе", "Бетан", "Хильдур Бок"};
-    /**
-     * "Коллекция" мест для генератора
-     */
+
+    /** "Коллекция" мест для генератора */
     private static final String[] locations = {"дома", "на крыше", "на улице", "у бабушки"};
-    /**
-     * "Коллекция" времён для генератора (как долго персонаж будет в этом месте)
-     */
+
+    /** "Коллекция" времён для генератора (как долго персонаж будет в этом месте) */
     private static final String[] times = {"вечно", "на каникулы", "весь отпуск", "день", "неделю"};
-    /**
-     * "Коллекция" характеров
-     */
+    /** "Коллекция" характеров */
     private static final String[] characters = {"твёрдым", "мягким", "игривым", "тяжёлым", "весёлым"};
-    /**
-     * Служебная переменная рандомайзер для генератора
-     */
+
+    /** Служебная переменная рандомайзер для генератора */
     private static final Random randomize = new Random();
 
-    /**
-     * Метод, который вызывается у управляющих команд без параметра
-     */
+    /** Метод, который вызывается у управляющих команд без параметра */
     public void doIt() {
         System.err.println("Что-то пошло не так.");
     }
 
     /**
      * Метод, вызывающийся у управляющих команд с параметром
-     *
      * @param i параметр, передающийся команде
      */
     public void doIt(int i) {
