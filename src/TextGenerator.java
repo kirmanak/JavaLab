@@ -30,7 +30,7 @@ public class TextGenerator {
         while (true) {
             System.out.print("Введите команду: ");
             String command = scanner.nextLine();
-            new Thread(() -> decodeCommand(command)).start();
+            decodeCommand(command);
         }
     }
 
