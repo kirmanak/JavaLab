@@ -55,7 +55,7 @@ public class TextGenerator {
                 try {
                     Commands.valueOf(command.replaceAll(" ", "")).doIt();
                 } catch (IllegalArgumentException err) {
-                    System.err.println("Моя твоя не понимай. Попробуй написать " + Commands.help.name());
+                    System.err.print("Моя твоя не понимай. Попробуй написать " + Commands.help.name());
                 }
             }
         }
