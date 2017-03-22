@@ -20,10 +20,6 @@ class Location {
         return this.getName();
     }
 
-    public boolean equals(Location location) {
-        return this.hashCode() == location.hashCode() && this.getName().equals(location.getName());
-    }
-
     public int hashCode () {
         if (this.hash == 0) {
             this.hash = this.getName().length();

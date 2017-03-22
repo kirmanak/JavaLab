@@ -17,11 +17,11 @@ class Humans implements Comparable<Humans> {
     /**
      * Как долго человек будет находится в этом месте
      */
-    private String time;
+    private final String time;
     /**
      * Место, в котором находится человек
      */
-    private Location location;
+    private final Location location;
     private int hash = 0;
 
     /**
@@ -63,10 +63,6 @@ class Humans implements Comparable<Humans> {
     public String toString() {
         return this.getRelative().toString() + " " + this.getName() + " с " + this.getCharacter()
                 + " характером, который находится " + this.getLocation().toString() + " " + this.getTime();
-    }
-
-    public boolean equals(Humans humans) {
-        return this.hashCode() == humans.hashCode() && this.toString().equals(humans.toString());
     }
 
     public int hashCode () {

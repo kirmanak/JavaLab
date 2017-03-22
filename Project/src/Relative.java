@@ -43,7 +43,4 @@ enum Relative {
         }
     },;
 
-    public boolean equals(Relative relative) {
-        return this.hashCode() == relative.hashCode() && this.toString().equals(relative.toString());
-    }
 }

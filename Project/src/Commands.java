@@ -1,6 +1,10 @@
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import javafx.scene.Node;
+import javafx.scene.control.Slider;
+import javafx.scene.control.TreeView;
+import javafx.scene.layout.GridPane;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,43 +17,47 @@ import java.util.Vector;
 /**
  * Enumeration команд, использующихся в программе
  */
-enum Commands implements Command {
+enum Commands {
     /** Удаляет элемент из коллекции */
-
     remove {
         public String toString() {
-            return "remove element - удалить элемент под номером element.\nremove_last - удалить последний элемент.\n";
+            return "remove element - удалить элемент под номером element.\n";
         }
 
-        @Override
-        public void doIt(int index) {
+        public void action (GridPane pane) {
+            for (Node node : pane.getChildren()) {
+                if (node.getClass().equals(Slider.class)) {
+                    Slider slider = (Slider) node;
+                    doIt((int) slider.getValue());
+                    break;
+                }
+            }
+            Commands.print.action(pane);
+        }
+
+        public String doIt(int index) {
             index--;
             if (index < TextGenerator.collection.size() && index >= 0) {
                 TextGenerator.collection.remove(index);
-                System.out.println(index + 1 + "-й элемент удалён.");
+                return String.format("%d-й элемент удалён", index+1);
             } else {
-                System.out.println("Нет такого элемента.");
+                return "Нет такого элемента.";
             }
-        }
-
-        public void doIt() {
-            System.err.println("Нужен номер элемента.");
         }
     },
-    /** Печатает справку по командам приложения */
-    help {
+    /** Удаляет последний элемент в коллекции */
+    removelast{
         public String toString() {
-            String help = "Я могу следующее:\nhelp - напечатать эту справку.";
-            for (Commands commands : Commands.values()) {
-                if (!commands.equals(Commands.help)) {
-                    help = help.concat(commands.toString());
-                }
-            }
-            return help;
+            return "remove_last - удалить последний элемент.\n";
         }
 
-        public void doIt() {
-            System.out.println(toString());
+        public void action(GridPane pane) {
+            Commands.remove.doIt(TextGenerator.collection.size()-1);
+            Commands.print.action(pane);
+        }
+
+        public String doIt() {
+           return Commands.remove.doIt(TextGenerator.collection.size()-1);
         }
     },
     /** Записывает коллекцию в JSON-файл. */
@@ -58,13 +66,14 @@ enum Commands implements Command {
             return "save - сохранить коллекцию в JSON-файл.\n";
         }
 
-        public void doIt() {
+        public String doIt() {
             try (PrintWriter pw = new PrintWriter(new File(jsonFile))) {
                 pw.flush();
                 pw.print(gson.toJson(TextGenerator.collection));
             } catch (IOException | NullPointerException err) {
-                System.err.println("Файл вывода не найден. Не буду ничего писать. $jsonFile = " + jsonFile);
+                return "Файл вывода не найден. Не буду ничего писать. $jsonFile = " + jsonFile;
             }
+            return null;
         }
     },
     /** Считывает коллекцию из JSON-файла */
@@ -73,7 +82,7 @@ enum Commands implements Command {
             return "load - считать коллекцию из JSON-файла.\n";
         }
 
-        public void doIt() {
+        public String doIt() {
             try (BufferedReader br = new BufferedReader(new FileReader(jsonFile))) {
                 String read = br.readLine();
                 if (!(read == null || read.isEmpty())) {
@@ -81,12 +90,13 @@ enum Commands implements Command {
                         TextGenerator.collection = gson.fromJson(read, new TypeToken<Vector<Humans>>() {
                         }.getType());
                     } catch (JsonSyntaxException err) {
-                        System.err.println("Ошибка чтения коллекции из файла.");
+                        return "Ошибка чтения коллекции из файла.";
                     }
-                } else System.out.println("Файл пуст");
+                } else return "Файл пуст";
             } catch (IOException | NullPointerException err) {
-                System.err.println("Файл ввода не найден. Не буду ничего читать. $jsonFile = " + jsonFile);
+                return "Файл ввода не найден. Не буду ничего читать. $jsonFile = " + jsonFile;
             }
+            return null;
         }
     },
     /** Печатает содержимое коллекции и количество элементов в ней */
@@ -95,19 +105,15 @@ enum Commands implements Command {
             return "print - напечатать коллекцию.\n";
         }
 
-        public void doIt() {
-            System.out.println("В коллекции " + TextGenerator.collection.size() + " элемент(ов)(а):");
-            TextGenerator.collection.forEach(human -> System.out.println(human.toString()));
-        }
-    },
-    /** Выход из программы */
-    exit {
-        public String toString() {
-            return "exit - сохранить и выйти.\n";
+        public void action(GridPane pane) {
+            TreeView<String> view =  new TreeView<>(TextGenerator.list());
+            pane.getChildren().set(0, view);
         }
 
-        public void doIt() {
-            System.exit(0);
+        public String doIt() {
+            StringBuilder string = new StringBuilder();
+            for (Humans humans : TextGenerator.collection) string.append(humans.toString()).append("\n");
+            return string.toString();
         }
     },
     /** Добавляет нового человека */
@@ -116,7 +122,12 @@ enum Commands implements Command {
             return "add - добавить нового человека.\n";
         }
 
-        public void doIt() {
+        public void action(GridPane pane) {
+
+            Commands.print.action(pane);
+        }
+
+        public String doIt() {
             System.out.print("Введите имя: ");
             String name = TextGenerator.scanner.nextLine();
             System.out.print("Введите характер: ");
@@ -141,6 +152,7 @@ enum Commands implements Command {
                 }
             }
             TextGenerator.collection.add(human);
+            return null;
         }
     },
     /** Генерирует новых людей */
@@ -159,18 +171,29 @@ enum Commands implements Command {
             return new Humans(name, character, location, time, relative);
         }
 
-        public void doIt() {
-            System.err.println("Нужно указать количество элементов, которое нужно сгенерировать.");
+        public void action (GridPane pane) {
+            for (Node node : pane.getChildren()) {
+                if (node.getClass().equals(Slider.class)) {
+                    Slider slider = (Slider) node;
+                    doIt((int) slider.getValue());
+                    break;
+                }
+            }
+            Commands.print.action(pane);
         }
 
-        public void doIt(int amountOfElements) {
+        public String doIt() {
+            return "Нужно указать количество элементов, которое нужно сгенерировать.";
+        }
+
+        public String doIt(int amountOfElements) {
             if (amountOfElements >= 0 && amountOfElements <= 100) {
                 for (int i = 0; i < amountOfElements; i++) {
                     TextGenerator.collection.add(generate());
                 }
-                System.out.println("Сгенерировал " + amountOfElements + " элементов.");
+                return "Сгенерировал " + amountOfElements + " элементов.";
             } else {
-                System.err.println("Кажется, ты ошибся в количестве элементов. Я работаю с числами в диапозоне [0;100].");
+                return "Кажется, ты ошибся в количестве элементов. Я работаю с числами в диапозоне [0;100].";
             }
         }
     };
@@ -196,15 +219,19 @@ enum Commands implements Command {
     private static final Random randomize = new Random();
 
     /** Метод, который вызывается у управляющих команд без параметра */
-    public void doIt() {
-        System.err.println("Что-то пошло не так.");
+    public String doIt() {
+        return "Что-то пошло не так.";
     }
 
     /**
      * Метод, вызывающийся у управляющих команд с параметром
      * @param i параметр, передающийся команде
      */
-    public void doIt(int i) {
-        System.err.println("Что-то пошло не так.");
+    public String doIt(int i) {
+        return "Что-то пошло не так.";
+    }
+
+    public void action(GridPane pane) {
+        System.err.println("Ты забыл добавить действие новой команде.");
     }
 }
