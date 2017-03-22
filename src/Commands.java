@@ -2,20 +2,26 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Random;
 import java.util.Vector;
 
 /**
  * Enumeration команд, использующихся в программе
  */
-enum Commands {
+enum Commands implements Command {
     /** Удаляет элемент из коллекции */
+
     remove {
         public String toString() {
             return "remove element - удалить элемент под номером element.\nremove_last - удалить последний элемент.\n";
         }
 
+        @Override
         public void doIt(int index) {
             index--;
             if (index < TextGenerator.collection.size() && index >= 0) {
@@ -57,7 +63,7 @@ enum Commands {
                 pw.flush();
                 pw.print(gson.toJson(TextGenerator.collection));
             } catch (IOException | NullPointerException err) {
-                System.err.println("Файл вывода не найден. Не буду ничего писать. $fileJson = " + jsonFile);
+                System.err.println("Файл вывода не найден. Не буду ничего писать. $jsonFile = " + jsonFile);
             }
         }
     },
@@ -79,7 +85,7 @@ enum Commands {
                     }
                 } else System.out.println("Файл пуст");
             } catch (IOException | NullPointerException err) {
-                System.err.println("Файл ввода не найден. Не буду ничего читать. $fileJson = " + jsonFile);
+                System.err.println("Файл ввода не найден. Не буду ничего читать. $jsonFile = " + jsonFile);
             }
         }
     },

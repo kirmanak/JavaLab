@@ -40,23 +40,23 @@ class Humans implements Comparable<Humans> {
         this.time = time;
     }
 
-    public String getName() {
+    private String getName() {
         return this.name;
     }
 
-    public Relative getRelative() {
+    private Relative getRelative() {
         return this.relative;
     }
 
-    public String getTime() {
+    private String getTime() {
         return this.time;
     }
 
-    public String getCharacter() {
+    private String getCharacter() {
         return this.character;
     }
 
-    public Location getLocation() {
+    private Location getLocation() {
         return this.location;
     }
 

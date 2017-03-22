@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
  * Работает с файлом, записанным в переменную окружения под названием jsonFile.
  */
 
-public class TextGenerator {
+class TextGenerator {
     /**
      * Служебная переменная, служащая для чтения командной строки
      */
@@ -27,6 +27,7 @@ public class TextGenerator {
     public static void main(String[] args) {
         Runtime.getRuntime().addShutdownHook(new Thread(Commands.save::doIt));
         Commands.load.doIt();
+        //noinspection InfiniteLoopStatement
         while (true) {
             System.out.print("Введите команду: ");
             String command = scanner.nextLine();
