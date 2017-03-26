@@ -1,9 +1,6 @@
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-import javafx.scene.Node;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TreeView;
 import javafx.scene.layout.GridPane;
 
 import java.io.BufferedReader;
@@ -17,22 +14,16 @@ import java.util.Vector;
 /**
  * Enumeration команд, использующихся в программе
  */
-enum Commands {
+enum Commands implements Runnable {
     /** Удаляет элемент из коллекции */
     remove {
-        public String toString() {
-            return "remove element - удалить элемент под номером element.\n";
+        @Override
+        public void run() {
+            System.err.println("Something went wrong.");
         }
 
-        public void action (GridPane pane) {
-            for (Node node : pane.getChildren()) {
-                if (node.getClass().equals(Slider.class)) {
-                    Slider slider = (Slider) node;
-                    doIt((int) slider.getValue());
-                    break;
-                }
-            }
-            Commands.print.action(pane);
+        public String toString() {
+            return "remove element - удалить элемент под номером element.\n";
         }
 
         public String doIt(int index) {
@@ -45,23 +36,13 @@ enum Commands {
             }
         }
     },
-    /** Удаляет последний элемент в коллекции */
-    removelast{
-        public String toString() {
-            return "remove_last - удалить последний элемент.\n";
-        }
-
-        public void action(GridPane pane) {
-            Commands.remove.doIt(TextGenerator.collection.size()-1);
-            Commands.print.action(pane);
-        }
-
-        public String doIt() {
-           return Commands.remove.doIt(TextGenerator.collection.size()-1);
-        }
-    },
     /** Записывает коллекцию в JSON-файл. */
     save {
+        @Override
+        public void run() {
+            System.err.println(doIt());
+        }
+
         public String toString() {
             return "save - сохранить коллекцию в JSON-файл.\n";
         }
@@ -77,7 +58,13 @@ enum Commands {
         }
     },
     /** Считывает коллекцию из JSON-файла */
-    load {
+    load{
+        @Override
+        public void run() {
+            System.err.println(doIt());
+            Thread.currentThread().notifyAll();
+        }
+
         public String toString() {
             return "load - считать коллекцию из JSON-файла.\n";
         }
@@ -101,13 +88,13 @@ enum Commands {
     },
     /** Печатает содержимое коллекции и количество элементов в ней */
     print {
-        public String toString() {
-            return "print - напечатать коллекцию.\n";
+        @Override
+        public void run() {
+            System.err.println("Something went wrong.");
         }
 
-        public void action(GridPane pane) {
-            TreeView<String> view =  new TreeView<>(TextGenerator.list());
-            pane.getChildren().set(0, view);
+        public String toString() {
+            return "print - напечатать коллекцию.\n";
         }
 
         public String doIt() {
@@ -118,13 +105,13 @@ enum Commands {
     },
     /** Добавляет нового человека */
     add {
-        public String toString() {
-            return "add - добавить нового человека.\n";
+        @Override
+        public void run() {
+            System.err.println("Something went wrong.");
         }
 
-        public void action(GridPane pane) {
-
-            Commands.print.action(pane);
+        public String toString() {
+            return "add - добавить нового человека.\n";
         }
 
         public String doIt() {
@@ -157,6 +144,11 @@ enum Commands {
     },
     /** Генерирует новых людей */
     generate {
+        @Override
+        public void run() {
+            System.err.println("Something went wrong.");
+        }
+
         public String toString() {
             return "generate - сгенерировать нового человека на основе данных, заложенных разработчиком" +
                     "(может быть довольно весело)";
@@ -169,17 +161,6 @@ enum Commands {
             Location location = new Location(locations[randomize.nextInt(locations.length)]);
             Relative relative = Relative.values()[randomize.nextInt(Relative.values().length)];
             return new Humans(name, character, location, time, relative);
-        }
-
-        public void action (GridPane pane) {
-            for (Node node : pane.getChildren()) {
-                if (node.getClass().equals(Slider.class)) {
-                    Slider slider = (Slider) node;
-                    doIt((int) slider.getValue());
-                    break;
-                }
-            }
-            Commands.print.action(pane);
         }
 
         public String doIt() {
@@ -233,5 +214,10 @@ enum Commands {
 
     public void action(GridPane pane) {
         System.err.println("Ты забыл добавить действие новой команде.");
+    }
+
+    @Override
+    public void run() {
+        System.err.println("Something went wrong.");
     }
 }

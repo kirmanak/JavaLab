@@ -24,12 +24,12 @@ public class TextGenerator extends Application {
     static Vector<Humans> collection = new Vector<>();
 
     public static void main(String[] args) {
-        Runtime.getRuntime().addShutdownHook(new Thread(Commands.save::doIt));
+        Runtime.getRuntime().addShutdownHook(new Thread(Commands.save));
         Commands.load.doIt();
         launch(args);
     }
 
-    static TreeItem<String> list () {
+    private static void updateList (GridPane layout, Slider slider) {
         TreeItem<String> tree = new TreeItem<>("Коллекция: ");
         String list = Commands.print.doIt();
         for (String s : list.split("\n")) {
@@ -39,14 +39,15 @@ public class TextGenerator extends Application {
             tree.getChildren().add(item);
         }
         tree.setExpanded(true);
-        return tree;
+        layout.getChildren().set(0, new TreeView<>(tree));
+        slider.setMax(collection.size());
     }
 
     @Override
     public void start(Stage primaryStage) {
         GridPane layout = new GridPane();
 
-        TreeView<String> view = new TreeView<>(list());
+        TreeView<String> view = new TreeView<>();
         layout.add(view,0,0);
 
         Slider slider = new Slider(0, collection.size(), 1);
@@ -55,6 +56,8 @@ public class TextGenerator extends Application {
         slider.setMajorTickUnit(1);
         slider.setMinorTickCount(0);
         slider.setSnapToTicks(true);
+
+        updateList(layout,slider);
 
         TextField name = new TextField();
         name.setPromptText("Имя");
@@ -66,40 +69,51 @@ public class TextGenerator extends Application {
         DatePicker picker = new DatePicker(LocalDate.now());
 
         Menu menu = new Menu("Меню");
-        MenuItem[] items = new MenuItem[Commands.values().length];
-        for (int i = 0; i < items.length; i++) {
-            items[i] = new MenuItem(Commands.values()[i].toString());
+        MenuItem[] items = new MenuItem[Commands.values().length+1];
+        int i = 0;
+        for (; i < items.length-1; i++) {
             switch (Commands.values()[i]) {
-                case remove:items[i].setOnAction((event) -> {
-                    Commands.remove.action(layout);
-                    slider.setMax(collection.size());
+                case remove: items[i] = new MenuItem(Commands.remove.toString());
+                    items[i].setOnAction((event) -> {
+                    System.err.println(Commands.remove.doIt((int) slider.getValue()));
+                    updateList(layout,slider);
                 });
                     break;
-                case add:items[i].setOnAction((event) -> {
+                case add:items[i] = new MenuItem(Commands.add.toString());
+                    items[i].setOnAction((event) -> {
                     Commands.add.action(layout);
-                    slider.setMax(collection.size());
+                    updateList(layout,slider);
                 });
                     break;
-                case load:items[i].setOnAction((event) -> Commands.load.action(layout));
-                    break;
-                case save:items[i].setOnAction((event) -> Commands.save.action(layout));
-                    break;
-                case print: items[i].setOnAction((event) -> Commands.print.action(layout));
-                    break;
-                case generate:items[i].setOnAction((event) -> {
-                    Commands.generate.action(layout);
-                    slider.setMax(collection.size());
+                case load:items[i] = new MenuItem(Commands.load.toString());
+                    items[i].setOnAction((event) -> {
+                        System.err.println(Commands.load.doIt());
+                        updateList(layout,slider);
                 });
                     break;
-                case removelast:items[i].setOnAction((event) -> {
-                    Commands.removelast.action(layout);
-                    slider.setMax(collection.size());
+                case save:items[i] = new MenuItem(Commands.save.toString());
+                    items[i].setOnAction((event) ->
+                            new Thread(Commands.save).start());
+                        //System.err.println(Commands.save.doIt()));
+                    break;
+                case print:items[i] = new MenuItem(Commands.save.toString());
+                    items[i].setOnAction((event) -> updateList(layout,slider));
+                    break;
+                case generate:items[i] = new MenuItem(Commands.generate.toString());
+                    items[i].setOnAction((event) -> {
+                    System.err.println(Commands.generate.doIt((int) slider.getValue()));
+                    updateList(layout,slider);
                 });
                     break;
                 default:
                     System.err.println("Ты забыл добавить новую команду.");
             }
         }
+        items[i] = new MenuItem("remove_last - удалить последний элемент.");
+        items[i].setOnAction((event -> {
+            System.err.println(Commands.remove.doIt(TextGenerator.collection.size()));
+            updateList(layout,slider);
+        }));
         menu.getItems().addAll(items);
         layout.add(new MenuBar(menu),0,1);
 
