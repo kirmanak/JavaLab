@@ -1,5 +1,5 @@
 import java.time.LocalDate;
-
+import java.time.format.DateTimeFormatter;
 /**
  * Люди как-то связанные с Малышом
  */
@@ -17,7 +17,7 @@ class Humans implements Comparable<Humans> {
      */
     private final Relative relative;
     /**
-     * Как долго человек будет находится в этом месте
+     * До какой даты человек будет находится в этом месте
      */
     private final LocalDate time;
     /**
@@ -30,7 +30,7 @@ class Humans implements Comparable<Humans> {
      * @param name      Имя человека
      * @param character Характер человека
      * @param location  Местонахождение человека
-     * @param time      Время, в течение которого он будет там находиться
+     * @param time      Время, до которого он будет там находиться
      * @param relative  Отношения с Малышом
      */
 
@@ -64,7 +64,8 @@ class Humans implements Comparable<Humans> {
 
     public String toString() {
         return this.getRelative().toString() + " " + this.getName() + " с " + this.getCharacter()
-                + " характером, который находится " + this.getLocation().toString() + " до " + this.getTime().toString();
+                + " характером, который находится " + this.getLocation().toString() + " до "
+                + this.getTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
     }
 
     public int hashCode () {

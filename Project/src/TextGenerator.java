@@ -36,7 +36,7 @@ public class TextGenerator extends Application {
         }
         tree.setExpanded(true);
         layout.getChildren().set(0, new TreeView<>(tree));
-        slider.setMax(collection.size());
+        slider.setMax(collection.size()+1);
     }
 
     @Override
@@ -122,7 +122,6 @@ public class TextGenerator extends Application {
             updateList(layout,slider);
         }));
         menu.getItems().addAll(items);
-        items = null;
         layout.add(new MenuBar(menu),0,1);
 
         layout.add(name,0,2);

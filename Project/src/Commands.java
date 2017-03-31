@@ -137,11 +137,11 @@ enum Commands implements Runnable {
                     }
                 }
                 if (node.getClass().equals(DatePicker.class)) {
-                    DatePicker datePicker = (DatePicker) node;
+                    @SuppressWarnings("ConstantConditions") DatePicker datePicker = (DatePicker) node;
                     time = datePicker.getValue();
                 }
                 if (node.getClass().equals(ChoiceBox.class)) {
-                    ChoiceBox<Relative> box = (ChoiceBox<Relative>) node;
+                    @SuppressWarnings({"unchecked", "ConstantConditions"}) ChoiceBox<Relative> box = (ChoiceBox<Relative>) node;
                     relative = box.getValue();
                 }
             }
