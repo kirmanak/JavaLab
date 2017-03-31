@@ -127,6 +127,7 @@ enum Commands implements Runnable {
                     }
                 }
                 if (node.getClass().equals(HBox.class)) {
+                    //noinspection ConstantConditions
                     HBox hBox = (HBox) node;
                     for (Node node1 : hBox.getChildren()) {
                         if (node1.getClass().equals(DatePicker.class)) {
@@ -134,6 +135,7 @@ enum Commands implements Runnable {
                             time = datePicker.getValue();
                         }
                         if (node1.getClass().equals(ChoiceBox.class)) {
+                            //noinspection unchecked,ConstantConditions
                             ChoiceBox<Relative> box = (ChoiceBox<Relative>) node1;
                             relative = box.getValue();
                         }

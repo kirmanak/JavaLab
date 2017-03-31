@@ -1,6 +1,7 @@
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 /** Отношения людей с Малышом */
+@SuppressWarnings("WeakerAccess")
 class Humans implements Comparable<Humans> {
     /** Имя */
     private final String name;

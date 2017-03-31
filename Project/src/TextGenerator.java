@@ -17,9 +17,9 @@ import java.util.Vector;
 public class TextGenerator extends Application {
     /** Сама коллекция  */
     static Vector<Humans> collection = new Vector<>();
-    static GridPane layout;
-    static Slider slider;
-    static double vBoxHeight;
+    private static GridPane layout;
+    private static Slider slider;
+    private static double vBoxHeight;
 
     public static void main(String[] args) {
         Runtime.getRuntime().addShutdownHook(new Thread(Commands.save));
@@ -33,7 +33,7 @@ public class TextGenerator extends Application {
     }
 
     /** Метод для обновления отображаемой коллекции в случае её изменения*/
-    static void updateList () {
+    private static void updateList () {
         TreeItem<String> tree = new TreeItem<>("Коллекция: ");
         String list = Commands.print.doIt();
         if (!list.isEmpty()) {
