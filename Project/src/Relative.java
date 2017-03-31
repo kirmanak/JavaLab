@@ -2,41 +2,31 @@
  * Отношения с Малышом
  */
 enum Relative {
-    /**
-     * Отец
-     */
+    /** Отец */
     father {
         public String toString() {
             return "папа";
         }
     },
-    /**
-     * Мама
-     */
+    /** Мама */
     mother {
         public String toString() {
             return "мама";
         }
     },
-    /**
-     * Дядя
-     */
+    /** Дядя */
     uncle {
         public String toString() {
             return "дядя";
         }
     },
-    /**
-     * Сиблинги - дети одних родителей (братья и сёстры одним словом)
-     */
+    /** Сиблинги - дети одних родителей (братья и сёстры одним словом) */
     sibling {
         public String toString() {
             return "сиблинг";
         }
     },
-    /**
-     * Домработница
-     */
+    /** Домработница */
     housewife {
         public String toString() {
             return "домработница";

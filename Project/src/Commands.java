@@ -64,7 +64,7 @@ enum Commands implements Runnable {
         }
     },
     /** Считывает коллекцию из JSON-файла */
-    load{
+    load {
         @Override
         public void run() {
             System.err.println(doIt());
@@ -123,7 +123,7 @@ enum Commands implements Runnable {
         public void action(GridPane layout) {
             String name = "", character = "";
             LocalDate time= LocalDate.now();
-            Relative relative= Relative.sibling;  //!!!!
+            Relative relative= Relative.sibling;
             Location location= new Location("");
             for (Node node : layout.getChildren()) {
                 if (node.getClass().equals(TextField.class)) {
@@ -134,14 +134,16 @@ enum Commands implements Runnable {
                         case "Местонахождение": location = new Location(field.getText());
                             break;
                         case "Характер": character = field.getText();
+                            break;
+                        default:break;
                     }
                 }
                 if (node.getClass().equals(DatePicker.class)) {
-                    @SuppressWarnings("ConstantConditions") DatePicker datePicker = (DatePicker) node;
+                    DatePicker datePicker = (DatePicker) node;
                     time = datePicker.getValue();
                 }
                 if (node.getClass().equals(ChoiceBox.class)) {
-                    @SuppressWarnings({"unchecked", "ConstantConditions"}) ChoiceBox<Relative> box = (ChoiceBox<Relative>) node;
+                    ChoiceBox<Relative> box = (ChoiceBox<Relative>) node;
                     relative = box.getValue();
                 }
             }

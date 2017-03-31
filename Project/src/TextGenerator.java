@@ -97,12 +97,10 @@ public class TextGenerator extends Application {
                     });
                     break;
                 case save:items[i] = new MenuItem(Commands.save.toString());
-                    items[i].setOnAction((event) ->
-                            //new Thread(Commands.save).start());
-                            System.err.println(Commands.save.doIt()));
+                    items[i].setOnAction((event) -> System.err.println(Commands.save.doIt()));
                     break;
 
-                case print:items[i] = new MenuItem(Commands.save.toString());
+                case print: items[i] = new MenuItem(Commands.save.toString());
                     items[i].setOnAction((event) -> updateList(layout,slider));
                     break;
 

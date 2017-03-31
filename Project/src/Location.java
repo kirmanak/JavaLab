@@ -2,9 +2,7 @@
  * Местонахождение человека
  */
 class Location {
-    /**
-     * Имя локации
-     */
+    /** Имя локации */
     private final String name;
     private int hash = 0;
 

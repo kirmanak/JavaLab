@@ -1,28 +1,16 @@
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-/**
- * Люди как-то связанные с Малышом
- */
+/** Отношения людей с Малышом */
 class Humans implements Comparable<Humans> {
-    /**
-     * Имя
-     */
+    /** Имя */
     private final String name;
-    /**
-     * Характер
-     */
+    /** Характер */
     private final String character;
-    /**
-     * Его отношения с малышом
-     */
+    /** Его отношения с малышом */
     private final Relative relative;
-    /**
-     * До какой даты человек будет находится в этом месте
-     */
+    /** До какой даты человек будет находится в этом месте */
     private final LocalDate time;
-    /**
-     * Место, в котором находится человек
-     */
+    /** Место, в котором находится человек */
     private final Location location;
     private int hash = 0;
 
