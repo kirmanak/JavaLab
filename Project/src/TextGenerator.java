@@ -3,6 +3,7 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
@@ -60,14 +61,16 @@ public class TextGenerator extends Application {
     private Dialog helpDialog() {
         Dialog dialog = new Dialog();
         dialog.setTitle("Справка");
-        StringBuilder help = new StringBuilder();
-        for (Commands commands : Commands.values()) {
-            help.append(commands.name()).append(" - ").append(commands.toString().toLowerCase());
-        }
-        dialog.setContentText(help.toString());
+        String help = "Назначение кнопок можно понять по их названиям, но назначение остальных элементов не" +
+                " столь очевидно: три текстовых поля ввода используются для команды add, которая создаёт новый" +
+                " элемент для коллекции на основе данных из этих трёх полей. Кроме того, этой команде нужны ещё" +
+                " дата (не ранее текущего дня) и одно из отношений к Малышу. \n" +
+                "Команды remove и generate используют слайдер, remove удаляет элемент, номер которого выбран на слайдере" +
+                ", а generate генерирует ровно такое количество новых элементов.";
+        dialog.setContentText(help);
         dialog.getDialogPane().getButtonTypes().add(ButtonType.FINISH);
-        dialog.setResizable(true);
-        dialog.getDialogPane().autosize();
+        //следующая строка честно похищена со stackoverflow
+        dialog.getDialogPane().getChildren().stream().filter(node -> node instanceof Label).forEach(node -> ((Label)node).setMinHeight(Region.USE_PREF_SIZE));
         return dialog;
     }
 

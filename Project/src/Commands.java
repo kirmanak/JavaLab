@@ -56,7 +56,7 @@ enum Commands implements Runnable {
             } catch (IOException | NullPointerException err) {
                 return "Файл вывода не найден. Не буду ничего писать. $jsonFile = " + jsonFile;
             }
-            return null;
+            return "Запись в файл прошла успешно.";
         }
     },
     /** Считывает коллекцию из JSON-файла */
@@ -87,7 +87,7 @@ enum Commands implements Runnable {
             } catch (IOException | NullPointerException err) {
                 return "Файл ввода не найден. Не буду ничего читать. $jsonFile = " + jsonFile;
             }
-            return null;
+            return "Чтение из файла прошло успешно.";
         }
     },
     /** Печатает содержимое коллекции и количество элементов в ней */
