@@ -1,3 +1,5 @@
+import java.time.LocalDate;
+
 /**
  * Люди как-то связанные с Малышом
  */
@@ -17,7 +19,7 @@ class Humans implements Comparable<Humans> {
     /**
      * Как долго человек будет находится в этом месте
      */
-    private final String time;
+    private final LocalDate time;
     /**
      * Место, в котором находится человек
      */
@@ -32,7 +34,7 @@ class Humans implements Comparable<Humans> {
      * @param relative  Отношения с Малышом
      */
 
-    public Humans(String name, String character, Location location, String time, Relative relative) {
+    public Humans(String name, String character, Location location, LocalDate time, Relative relative) {
         this.name = name;
         this.location = location;
         this.relative = relative;
@@ -40,29 +42,29 @@ class Humans implements Comparable<Humans> {
         this.time = time;
     }
 
-    private String getName() {
+    public String getName() {
         return this.name;
     }
 
-    private Relative getRelative() {
+    public Relative getRelative() {
         return this.relative;
     }
 
-    private String getTime() {
+    public LocalDate getTime() {
         return this.time;
     }
 
-    private String getCharacter() {
+    public String getCharacter() {
         return this.character;
     }
 
-    private Location getLocation() {
+    public Location getLocation() {
         return this.location;
     }
 
     public String toString() {
         return this.getRelative().toString() + " " + this.getName() + " с " + this.getCharacter()
-                + " характером, который находится " + this.getLocation().toString() + " " + this.getTime();
+                + " характером, который находится " + this.getLocation().toString() + " до " + this.getTime().toString();
     }
 
     public int hashCode () {

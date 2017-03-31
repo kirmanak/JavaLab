@@ -1,6 +1,10 @@
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import javafx.scene.Node;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 
 import java.io.BufferedReader;
@@ -8,6 +12,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.DateTimeException;
+import java.time.LocalDate;
 import java.util.Random;
 import java.util.Vector;
 
@@ -114,32 +120,32 @@ enum Commands implements Runnable {
             return "add - добавить нового человека.\n";
         }
 
-        public String doIt() {
-            System.out.print("Введите имя: ");
-            String name = TextGenerator.scanner.nextLine();
-            System.out.print("Введите характер: ");
-            String character = TextGenerator.scanner.nextLine();
-            System.out.print("Введите местонахождение: ");
-            String location = TextGenerator.scanner.nextLine();
-            System.out.print("Введите время: ");
-            String time = TextGenerator.scanner.nextLine();
-            System.out.println("Степени родства: ");
-            for (Relative relative : Relative.values()) {
-                System.out.print(relative.name() + " ");
-            }
-            System.out.println();
-            Humans human = null;
-            while (human == null) {
-                System.out.print("Введите степень родства: ");
-                String relative = TextGenerator.scanner.nextLine();
-                try {
-                    human = new Humans(name, character, new Location(location), time, Relative.valueOf(relative));
-                } catch (IllegalArgumentException err) {
-                    System.err.println("Не могу понять. Если что, надо на английском.");
+        public void action(GridPane layout) {
+            String name = "", character = "";
+            LocalDate time= LocalDate.now();
+            Relative relative= Relative.sibling;  //!!!!
+            Location location= new Location("");
+            for (Node node : layout.getChildren()) {
+                if (node.getClass().equals(TextField.class)) {
+                    TextField field = (TextField) node;
+                    switch (field.getPromptText()) {
+                        case "Имя": name = field.getText();
+                            break;
+                        case "Местоположение": location = new Location(field.getText());
+                            break;
+                        case "Характер": character = field.getText();
+                    }
+                }
+                if (node.getClass().equals(DatePicker.class)) {
+                    DatePicker datePicker = (DatePicker) node;
+                    time = datePicker.getValue();
+                }
+                if (node.getClass().equals(ChoiceBox.class)) {
+                    ChoiceBox<Relative> box = (ChoiceBox<Relative>) node;
+                    relative = box.getValue();
                 }
             }
-            TextGenerator.collection.add(human);
-            return null;
+            TextGenerator.collection.add(new Humans(name, character, location, time, relative));
         }
     },
     /** Генерирует новых людей */
@@ -156,7 +162,12 @@ enum Commands implements Runnable {
 
         private Humans generate() {
             String name = names[randomize.nextInt(names.length)];
-            String time = times[randomize.nextInt(times.length)];
+            LocalDate time = LocalDate.now();
+            try {
+                 time = LocalDate.ofEpochDay(LocalDate.now().toEpochDay() + Math.abs(randomize.nextInt(365)));
+            } catch (DateTimeException err) {
+                System.err.println(err.getLocalizedMessage());
+            }
             String character = characters[randomize.nextInt(characters.length)];
             Location location = new Location(locations[randomize.nextInt(locations.length)]);
             Relative relative = Relative.values()[randomize.nextInt(Relative.values().length)];
@@ -190,11 +201,8 @@ enum Commands implements Runnable {
 
     /** "Коллекция" мест для генератора */
     private static final String[] locations = {"дома", "на крыше", "на улице", "у бабушки"};
-
-    /** "Коллекция" времён для генератора (как долго персонаж будет в этом месте) */
-    private static final String[] times = {"вечно", "на каникулы", "весь отпуск", "день", "неделю"};
     /** "Коллекция" характеров */
-    private static final String[] characters = {"твёрдым", "мягким", "игривым", "тяжёлым", "весёлым"};
+    private static final String[] characters = {"твёрдым", "мягким", "тяжёлым", "весёлым"};
 
     /** Служебная переменная рандомайзер для генератора */
     private static final Random randomize = new Random();
