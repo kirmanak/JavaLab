@@ -1,7 +1,9 @@
 import javafx.application.Application;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.*;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.time.LocalDate;
@@ -23,7 +25,7 @@ public class TextGenerator extends Application {
     }
 
     /** Метод для обновления отображаемой коллекции в случае её изменения*/
-    private static void updateList (GridPane layout, Slider slider) {
+    private static void updateList (GridPane layout, Slider slider, double vBoxHeight) {
         TreeItem<String> tree = new TreeItem<>("Коллекция: ");
         String list = Commands.print.doIt();
         if (!list.isEmpty()) {
@@ -36,25 +38,104 @@ public class TextGenerator extends Application {
         }
         tree.setExpanded(true);
         TreeView<String> view = new TreeView<>(tree);
-        view.setMinWidth(1024);
-        layout.getChildren().set(0, view);
+        view.setMinWidth(800);
+        view.setMaxHeight(vBoxHeight);
+        view.setMinHeight(vBoxHeight);
+        layout.add(view,0,1);
         slider.setMax(collection.size());
-        if (slider.getMax() == 0) slider.setMin(1);
+        if (slider.getMax() == 0) {
+            slider.setMin(1);
+            slider.setMax(5);
+        }
+    }
+
+    private Dialog helpDialog() {
+        Dialog dialog = new Dialog();
+        dialog.setTitle("Справка");
+        StringBuilder help = new StringBuilder();
+        for (Commands commands : Commands.values()) {
+            help.append(commands.name()).append(" - ").append(commands.toString().toLowerCase());
+        }
+        dialog.setContentText(help.toString());
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.FINISH);
+        dialog.setResizable(true);
+        dialog.getDialogPane().autosize();
+        return dialog;
     }
 
     @Override
     public void start(Stage primaryStage) {
         GridPane layout = new GridPane();
-        layout.add(new TreeView<>(),0,0);
+        Menu menu = new Menu("Справка");
+        MenuItem help = new MenuItem("Получить справку");
+        help.setOnAction((event) -> helpDialog().showAndWait());
+        menu.getItems().add(help);
 
-        Slider slider = new Slider(1, collection.size(), 1);
+        Slider slider = new Slider(1, collection.size(), 5);
         slider.setShowTickMarks(true);
         slider.setShowTickLabels(true);
         slider.setMajorTickUnit(1);
         slider.setMinorTickCount(0);
         slider.setSnapToTicks(true);
 
-        updateList(layout,slider);
+        Button[] buttons = new Button[Commands.values().length];
+        VBox vBox = new VBox();
+        for (int i = 0; i < buttons.length; i++) {
+            switch (Commands.values()[i]) {
+                case remove: buttons[i] = new Button(Commands.remove.name());
+                    buttons[i].setTooltip(new Tooltip(Commands.remove.toString()));
+                    buttons[i].setOnAction((event) -> {
+                        System.err.println(Commands.remove.doIt((int) slider.getValue()));
+                        updateList(layout,slider,vBox.getHeight());
+                    });
+                    break;
+
+                case add:buttons[i] = new Button(Commands.add.name());
+                    buttons[i].setTooltip(new Tooltip(Commands.add.toString()));
+                    buttons[i].setOnAction((event) -> {
+                        Commands.add.action(layout);
+                        updateList(layout,slider,vBox.getHeight());
+                    });
+                    break;
+
+                case load:buttons[i] = new Button(Commands.load.name());
+                    buttons[i].setTooltip(new Tooltip(Commands.load.toString()));
+                    buttons[i].setOnAction((event) -> {
+                        System.err.println(Commands.load.doIt());
+                        updateList(layout,slider,vBox.getHeight());
+                    });
+                    break;
+                case save:buttons[i] = new Button(Commands.save.name());
+                    buttons[i].setTooltip(new Tooltip(Commands.save.toString()));
+                    buttons[i].setOnAction((event) -> System.err.println(Commands.save.doIt()));
+                    break;
+
+                    /* Вместо ненужного print будет команда remove_last */
+                case print: buttons[i] = new Button("remove_last");
+                    buttons[i].setTooltip(new Tooltip("Удалить последний элемент."));
+                    buttons[i].setOnAction((event -> {
+                        System.err.println(Commands.remove.doIt(TextGenerator.collection.size()));
+                        updateList(layout,slider,vBox.getHeight());
+                    }));
+                    break;
+
+                case generate:buttons[i] = new Button(Commands.generate.name());
+                    buttons[i].setTooltip(new Tooltip(Commands.generate.toString()));
+                    buttons[i].setOnAction((event) -> {
+                        System.err.println(Commands.generate.doIt((int) slider.getValue()));
+                        updateList(layout,slider,vBox.getHeight());
+                    });
+                    break;
+
+                default:
+                    System.err.println("Ты забыл добавить новую команду.");
+            }
+        }
+        vBox.getChildren().addAll(buttons);
+
+        layout.add(vBox,1,1);
+        MenuBar bar = new MenuBar(menu);
+        layout.add(bar,0,0);
 
         TextField name = new TextField();
         name.setText("Имя");
@@ -65,72 +146,34 @@ public class TextGenerator extends Application {
         TextField location = new TextField();
         location.setText("Местонахождение");
         location.setPromptText("Местонахождение");
+
         ChoiceBox<Relative> relations = new ChoiceBox<>();
         relations.getItems().addAll(Relative.values());
         relations.setValue(Relative.sibling);
-
         DatePicker picker = new DatePicker(LocalDate.now());
-
-        Menu menu = new Menu("Меню");
-        MenuItem[] items = new MenuItem[Commands.values().length+1];
-        int i = 0;
-        for (; i < items.length-1; i++) {
-            switch (Commands.values()[i]) {
-                case remove: items[i] = new MenuItem(Commands.remove.toString());
-                    items[i].setOnAction((event) -> {
-                        System.err.println(Commands.remove.doIt((int) slider.getValue()));
-                        updateList(layout,slider);
-                    });
-                    break;
-
-                case add:items[i] = new MenuItem(Commands.add.toString());
-                    items[i].setOnAction((event) -> {
-                        Commands.add.action(layout);
-                        updateList(layout,slider);
-                    });
-                    break;
-
-                case load:items[i] = new MenuItem(Commands.load.toString());
-                    items[i].setOnAction((event) -> {
-                        System.err.println(Commands.load.doIt());
-                        updateList(layout,slider);
-                    });
-                    break;
-                case save:items[i] = new MenuItem(Commands.save.toString());
-                    items[i].setOnAction((event) -> System.err.println(Commands.save.doIt()));
-                    break;
-
-                case print: items[i] = new MenuItem(Commands.save.toString());
-                    items[i].setOnAction((event) -> updateList(layout,slider));
-                    break;
-
-                case generate:items[i] = new MenuItem(Commands.generate.toString());
-                    items[i].setOnAction((event) -> {
-                        System.err.println(Commands.generate.doIt((int) slider.getValue()));
-                        updateList(layout,slider);
-                    });
-                    break;
-
-                default:
-                    System.err.println("Ты забыл добавить новую команду.");
-            }
-        }
-        items[i] = new MenuItem("remove_last - удалить последний элемент.");
-        items[i].setOnAction((event -> {
-            System.err.println(Commands.remove.doIt(TextGenerator.collection.size()));
-            updateList(layout,slider);
-        }));
-        menu.getItems().addAll(items);
-        layout.add(new MenuBar(menu),0,1);
+        picker.setOnAction((event) -> {
+            if (picker.getValue().toEpochDay()<LocalDate.now().toEpochDay())
+                picker.setValue(LocalDate.now());
+        });
+        HBox hBox = new HBox(relations,picker);
 
         layout.add(name,0,2);
         layout.add(character,0,3);
         layout.add(location,0,4);
-        layout.add(picker,0,5);
-        layout.add(relations,0,  6);
-        layout.add(slider,0,7);
+        layout.add(hBox,0,5);
+        layout.add(slider,1,0);
+
+        layout.add(new Label("Вакантное"), 1, 2);
+        layout.add(new Label("место"), 1, 3);
+        layout.add(new Label("для"), 1, 4);
+        layout.add(new Label("рекламы"), 1, 5);
         primaryStage.setTitle("Лабораторная №6");
         primaryStage.setScene(new Scene(layout));
         primaryStage.show();
+        updateList(layout,slider,vBox.getHeight());
+        primaryStage.sizeToScene();
+        Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
+        primaryStage.setX((primScreenBounds.getWidth() - primaryStage.getWidth()) / 2);
+        primaryStage.setY((primScreenBounds.getHeight() - primaryStage.getHeight()) / 2);
     }
 }

@@ -6,6 +6,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -20,16 +21,11 @@ import java.util.Vector;
 /**
  * Enumeration команд, использующихся в программе
  */
-enum Commands implements Runnable {
+enum Commands {
     /** Удаляет элемент из коллекции */
     remove {
-        @Override
-        public void run() {
-            System.err.println("Something went wrong.");
-        }
-
         public String toString() {
-            return "remove element - удалить элемент под номером element.\n";
+            return "Удалить элемент, на который указывает слайдер.\n";
         }
 
         public String doIt(int index) {
@@ -44,13 +40,8 @@ enum Commands implements Runnable {
     },
     /** Записывает коллекцию в JSON-файл. */
     save {
-        @Override
-        public void run() {
-            System.err.println(doIt());
-        }
-
         public String toString() {
-            return "save - сохранить коллекцию в JSON-файл.\n";
+            return "Сохранить коллекцию в JSON-файл.\n";
         }
 
         public String doIt() {
@@ -65,14 +56,8 @@ enum Commands implements Runnable {
     },
     /** Считывает коллекцию из JSON-файла */
     load {
-        @Override
-        public void run() {
-            System.err.println(doIt());
-            Thread.currentThread().notifyAll();
-        }
-
         public String toString() {
-            return "load - считать коллекцию из JSON-файла.\n";
+            return "Cчитать коллекцию из JSON-файла.\n";
         }
 
         public String doIt() {
@@ -94,13 +79,8 @@ enum Commands implements Runnable {
     },
     /** Печатает содержимое коллекции и количество элементов в ней */
     print {
-        @Override
-        public void run() {
-            System.err.println("Something went wrong.");
-        }
-
         public String toString() {
-            return "print - напечатать коллекцию.\n";
+            return "Напечатать коллекцию.\n";
         }
 
         public String doIt() {
@@ -111,13 +91,8 @@ enum Commands implements Runnable {
     },
     /** Добавляет нового человека */
     add {
-        @Override
-        public void run() {
-            System.err.println("Something went wrong.");
-        }
-
         public String toString() {
-            return "add - добавить нового человека.\n";
+            return "Добавить нового человека.\n";
         }
 
         public void action(GridPane layout) {
@@ -138,13 +113,18 @@ enum Commands implements Runnable {
                         default:break;
                     }
                 }
-                if (node.getClass().equals(DatePicker.class)) {
-                    DatePicker datePicker = (DatePicker) node;
-                    time = datePicker.getValue();
-                }
-                if (node.getClass().equals(ChoiceBox.class)) {
-                    ChoiceBox<Relative> box = (ChoiceBox<Relative>) node;
-                    relative = box.getValue();
+                if (node.getClass().equals(HBox.class)) {
+                    HBox hBox = (HBox) node;
+                    for (Node node1 : hBox.getChildren()) {
+                        if (node1.getClass().equals(DatePicker.class)) {
+                            DatePicker datePicker = (DatePicker) node1;
+                            time = datePicker.getValue();
+                        }
+                        if (node1.getClass().equals(ChoiceBox.class)) {
+                            ChoiceBox<Relative> box = (ChoiceBox<Relative>) node1;
+                            relative = box.getValue();
+                        }
+                    }
                 }
             }
             TextGenerator.collection.add(new Humans(name, character, location, time, relative));
@@ -152,14 +132,9 @@ enum Commands implements Runnable {
     },
     /** Генерирует новых людей */
     generate {
-        @Override
-        public void run() {
-            System.err.println("Something went wrong.");
-        }
-
         public String toString() {
-            return "generate - сгенерировать нового человека на основе данных, заложенных разработчиком" +
-                    "(может быть довольно весело)";
+            return "Сгенерировать элементов столько, сколько показывает слайдер, " +
+                    "\n со случайными наборами полей (может быть довольно весело)";
         }
 
         private Humans generate() {
@@ -224,10 +199,5 @@ enum Commands implements Runnable {
 
     public void action(GridPane pane) {
         System.err.println("Ты забыл добавить действие новой команде.");
-    }
-
-    @Override
-    public void run() {
-        System.err.println("Something went wrong.");
     }
 }
