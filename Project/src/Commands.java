@@ -21,7 +21,7 @@ import java.util.Vector;
 /**
  * Enumeration команд, использующихся в программе
  */
-enum Commands {
+enum Commands implements Runnable {
     /** Удаляет элемент из коллекции */
     remove {
         public String toString() {
@@ -40,6 +40,11 @@ enum Commands {
     },
     /** Записывает коллекцию в JSON-файл. */
     save {
+        @Override
+        public void run() {
+            System.err.println(doIt());
+        }
+
         public String toString() {
             return "Сохранить коллекцию в JSON-файл.\n";
         }
@@ -56,6 +61,14 @@ enum Commands {
     },
     /** Считывает коллекцию из JSON-файла */
     load {
+        @Override
+        public void run() {
+            synchronized (Commands.load) {
+                System.err.println(doIt());
+                Commands.load.notify();
+            }
+        }
+
         public String toString() {
             return "Cчитать коллекцию из JSON-файла.\n";
         }
@@ -199,5 +212,11 @@ enum Commands {
 
     public void action(GridPane pane) {
         System.err.println("Ты забыл добавить действие новой команде.");
+    }
+
+
+    @Override
+    public void run() {
+        System.err.println("Что-то пошло не так.");
     }
 }

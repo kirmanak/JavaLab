@@ -17,15 +17,23 @@ import java.util.Vector;
 public class TextGenerator extends Application {
     /** Сама коллекция  */
     static Vector<Humans> collection = new Vector<>();
+    static GridPane layout;
+    static Slider slider;
+    static double vBoxHeight;
 
     public static void main(String[] args) {
-        Runtime.getRuntime().addShutdownHook(new Thread(Commands.save::doIt));
-        Commands.load.doIt();
+        Runtime.getRuntime().addShutdownHook(new Thread(Commands.save));
+        new Thread(Commands.load).start();
+        try {
+            synchronized (Commands.load) {
+                Commands.load.wait();
+            }
+        } catch (InterruptedException ignored) {}
         launch(args);
     }
 
     /** Метод для обновления отображаемой коллекции в случае её изменения*/
-    private static void updateList (GridPane layout, Slider slider, double vBoxHeight) {
+    static void updateList () {
         TreeItem<String> tree = new TreeItem<>("Коллекция: ");
         String list = Commands.print.doIt();
         if (!list.isEmpty()) {
@@ -65,13 +73,13 @@ public class TextGenerator extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        GridPane layout = new GridPane();
+        layout = new GridPane();
         Menu menu = new Menu("Справка");
         MenuItem help = new MenuItem("Получить справку");
         help.setOnAction((event) -> helpDialog().showAndWait());
         menu.getItems().add(help);
 
-        Slider slider = new Slider(1, collection.size(), 5);
+        slider = new Slider(1, collection.size(), 5);
         slider.setShowTickMarks(true);
         slider.setShowTickLabels(true);
         slider.setMajorTickUnit(1);
@@ -86,7 +94,7 @@ public class TextGenerator extends Application {
                     buttons[i].setTooltip(new Tooltip(Commands.remove.toString()));
                     buttons[i].setOnAction((event) -> {
                         System.err.println(Commands.remove.doIt((int) slider.getValue()));
-                        updateList(layout,slider,vBox.getHeight());
+                        updateList();
                     });
                     break;
 
@@ -94,20 +102,26 @@ public class TextGenerator extends Application {
                     buttons[i].setTooltip(new Tooltip(Commands.add.toString()));
                     buttons[i].setOnAction((event) -> {
                         Commands.add.action(layout);
-                        updateList(layout,slider,vBox.getHeight());
+                        updateList();
                     });
                     break;
 
                 case load:buttons[i] = new Button(Commands.load.name());
                     buttons[i].setTooltip(new Tooltip(Commands.load.toString()));
                     buttons[i].setOnAction((event) -> {
-                        System.err.println(Commands.load.doIt());
-                        updateList(layout,slider,vBox.getHeight());
+                        new Thread(Commands.load).start();
+                        try {
+                            synchronized (Commands.load) {
+                                Commands.load.wait();
+                            }
+                        } catch (InterruptedException ignored) {}
+                        updateList();
                     });
                     break;
                 case save:buttons[i] = new Button(Commands.save.name());
                     buttons[i].setTooltip(new Tooltip(Commands.save.toString()));
-                    buttons[i].setOnAction((event) -> System.err.println(Commands.save.doIt()));
+                    buttons[i].setOnAction((event) ->
+                            new Thread(Commands.save).start());
                     break;
 
                     /* Вместо ненужного print будет команда remove_last */
@@ -115,7 +129,7 @@ public class TextGenerator extends Application {
                     buttons[i].setTooltip(new Tooltip("Удалить последний элемент."));
                     buttons[i].setOnAction((event -> {
                         System.err.println(Commands.remove.doIt(TextGenerator.collection.size()));
-                        updateList(layout,slider,vBox.getHeight());
+                        updateList();
                     }));
                     break;
 
@@ -123,7 +137,7 @@ public class TextGenerator extends Application {
                     buttons[i].setTooltip(new Tooltip(Commands.generate.toString()));
                     buttons[i].setOnAction((event) -> {
                         System.err.println(Commands.generate.doIt((int) slider.getValue()));
-                        updateList(layout,slider,vBox.getHeight());
+                        updateList();
                     });
                     break;
 
@@ -170,7 +184,8 @@ public class TextGenerator extends Application {
         primaryStage.setTitle("Лабораторная №6");
         primaryStage.setScene(new Scene(layout));
         primaryStage.show();
-        updateList(layout,slider,vBox.getHeight());
+        vBoxHeight = vBox.getHeight();
+        updateList();
         primaryStage.sizeToScene();
         Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
         primaryStage.setX((primScreenBounds.getWidth() - primaryStage.getWidth()) / 2);
