@@ -22,7 +22,7 @@ public class TextGenerator extends Application {
         launch(args);
     }
 
-    /** */
+    /** Метод для обновления отображаемой коллекции в случае её изменения*/
     private static void updateList (GridPane layout, Slider slider) {
         TreeItem<String> tree = new TreeItem<>("Коллекция: ");
         String list = Commands.print.doIt();
@@ -35,16 +35,17 @@ public class TextGenerator extends Application {
             }
         }
         tree.setExpanded(true);
-        layout.getChildren().set(0, new TreeView<>(tree));
-        slider.setMax(collection.size()+1);
+        TreeView<String> view = new TreeView<>(tree);
+        view.setMinWidth(1024);
+        layout.getChildren().set(0, view);
+        slider.setMax(collection.size());
+        if (slider.getMax() == 0) slider.setMin(1);
     }
 
     @Override
     public void start(Stage primaryStage) {
         GridPane layout = new GridPane();
-
-        TreeView<String> view = new TreeView<>();
-        layout.add(view,0,0);
+        layout.add(new TreeView<>(),0,0);
 
         Slider slider = new Slider(1, collection.size(), 1);
         slider.setShowTickMarks(true);

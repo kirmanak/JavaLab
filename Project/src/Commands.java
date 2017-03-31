@@ -131,7 +131,7 @@ enum Commands implements Runnable {
                     switch (field.getPromptText()) {
                         case "Имя": name = field.getText();
                             break;
-                        case "Местоположение": location = new Location(field.getText());
+                        case "Местонахождение": location = new Location(field.getText());
                             break;
                         case "Характер": character = field.getText();
                     }
