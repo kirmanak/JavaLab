@@ -71,15 +71,19 @@ public class TextGenerator extends Application {
     private static Dialog helpDialog() {
         Dialog dialog = new Dialog();
         dialog.setTitle("Справка");
-        String help = "Назначение кнопок можно понять по их названиям, но назначение остальных элементов не" +
-                " столь очевидно: три текстовых поля ввода используются для команды add, которая создаёт новый" +
-                " элемент для коллекции на основе данных из этих трёх полей. Кроме того, этой команде нужны ещё" +
+        String help = "Назначение кнопок можно понять по их названиям," +
+                " но назначение остальных элементов не" +
+                " столь очевидно: три текстовых поля ввода используются для команды add," +
+                " которая создаёт новый" +
+                " элемент для коллекции на основе данных из этих трёх полей. Кроме того," +
+                " этой команде нужны ещё" +
                 " дата (не ранее текущего дня) и одно из отношений к Малышу. \n" +
-                "Команды remove и generate используют слайдер, remove удаляет элемент, номер которого выбран на слайдере" +
+                "Команды remove и generate используют слайдер, remove удаляет элемент," +
+                " номер которого выбран на слайдере" +
                 ", а generate генерирует ровно такое количество новых элементов.";
         dialog.setContentText(help);
         dialog.getDialogPane().getButtonTypes().add(ButtonType.FINISH);
-        //следующая строка честно похищена со stackoverflow
+        //следующая строка честно похищена со stackoverflow для разбиения справки на строки
         dialog.getDialogPane().getChildren().stream().filter(node -> node instanceof Label).forEach(node -> ((Label)node).setMinHeight(Region.USE_PREF_SIZE));
         return dialog;
     }
@@ -99,7 +103,6 @@ public class TextGenerator extends Application {
         slider.setMinorTickCount(0);
         slider.setSnapToTicks(true);
 
-        VBox vBox = new VBox();
         Button[] buttons = new Button[Commands.values().length+1];
         buttons[0] = new Button("remove_last");
         buttons[0].setTooltip(new Tooltip("Удалить последний элемент."));
@@ -149,6 +152,7 @@ public class TextGenerator extends Application {
                     System.err.println("Ты забыл добавить новую команду.");
             }
         }
+        VBox vBox = new VBox();
         vBox.getChildren().addAll(buttons);
 
         layout.add(vBox,1,1);
