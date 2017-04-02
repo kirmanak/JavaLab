@@ -6,6 +6,7 @@ import javafx.stage.Stage;
 
 import java.time.LocalDate;
 import java.util.Vector;
+import java.util.concurrent.*;
 
 /**
  * EntryPoint, читающий консоль, чтобы определить команду, подлежащую выполнению.
@@ -14,33 +15,44 @@ import java.util.Vector;
 
 public class TextGenerator extends Application {
     /** Сама коллекция  */
-    static Vector<Humans> collection = new Vector<>();
+    static volatile Vector<Humans> collection = new Vector<>();
     private static GridPane layout;
     private static Slider slider;
     private static double vBoxHeight;
+    private static final Runnable load = () -> System.err.println(Commands.load.doIt());
+    private static final Runnable save = () -> System.err.println(Commands.save.doIt());
 
     public static void main(String[] args) {
-        Runtime.getRuntime().addShutdownHook(new Thread(Commands.save));
-        new Thread(Commands.load).start();
-        try {
-            synchronized (Commands.load) {
-                Commands.load.wait();
-            }
-        } catch (InterruptedException ignored) {}
+        Runtime.getRuntime().addShutdownHook(new Thread(save));
+        IO(load);
         launch(args);
+    }
+
+    /** Метод, осуществляющий ввод/вывод данных из/в файл(а) в отдельном потоке */
+    private static void IO (Runnable runnable) {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(runnable);
+        try {
+            executor.shutdown();
+            executor.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } finally {
+            if (!executor.isTerminated()) {
+                System.err.println("Слишком долго обрабатываются данные");
+                executor.shutdownNow();
+            }
+        }
     }
 
     /** Метод для обновления отображаемой коллекции в случае её изменения*/
     private static void updateList () {
         TreeItem<String> tree = new TreeItem<>("Коллекция: ");
-        String list = Commands.print.doIt();
-        if (!list.isEmpty()) {
-            for (String s : list.split("\n")) {
-                TreeItem<String> item =
-                        new TreeItem<>(s.substring(s.indexOf(" "), s.indexOf(" ", s.indexOf(" ") + 1)));
-                item.getChildren().add(new TreeItem<>(s));
-                tree.getChildren().add(item);
-            }
+        for (Humans humans : TextGenerator.collection) {
+            TreeItem<String> item =
+                    new TreeItem<>(humans.getName());
+            item.getChildren().add(new TreeItem<>(humans.toString()));
+            tree.getChildren().add(item);
         }
         tree.setExpanded(true);
         TreeView<String> view = new TreeView<>(tree);
@@ -55,7 +67,8 @@ public class TextGenerator extends Application {
         }
     }
 
-    private Dialog helpDialog() {
+    /** Метод, создающий диалоговое окно со справкой по программе */
+    private static Dialog helpDialog() {
         Dialog dialog = new Dialog();
         dialog.setTitle("Справка");
         String help = "Назначение кнопок можно понять по их названиям, но назначение остальных элементов не" +
@@ -86,10 +99,16 @@ public class TextGenerator extends Application {
         slider.setMinorTickCount(0);
         slider.setSnapToTicks(true);
 
-        Button[] buttons = new Button[Commands.values().length];
         VBox vBox = new VBox();
-        for (int i = 0; i < buttons.length; i++) {
-            switch (Commands.values()[i]) {
+        Button[] buttons = new Button[Commands.values().length+1];
+        buttons[0] = new Button("remove_last");
+        buttons[0].setTooltip(new Tooltip("Удалить последний элемент."));
+        buttons[0].setOnAction((event -> {
+            System.err.println(Commands.remove.doIt(TextGenerator.collection.size()));
+            updateList();
+        }));
+        for (int i = 1; i < buttons.length; i++) {
+            switch (Commands.values()[i-1]) {
                 case remove: buttons[i] = new Button(Commands.remove.name());
                     buttons[i].setTooltip(new Tooltip(Commands.remove.toString()));
                     buttons[i].setOnAction((event) -> {
@@ -109,28 +128,13 @@ public class TextGenerator extends Application {
                 case load:buttons[i] = new Button(Commands.load.name());
                     buttons[i].setTooltip(new Tooltip(Commands.load.toString()));
                     buttons[i].setOnAction((event) -> {
-                        new Thread(Commands.load).start();
-                        try {
-                            synchronized (Commands.load) {
-                                Commands.load.wait();
-                            }
-                        } catch (InterruptedException ignored) {}
+                        IO(load);
                         updateList();
                     });
                     break;
                 case save:buttons[i] = new Button(Commands.save.name());
                     buttons[i].setTooltip(new Tooltip(Commands.save.toString()));
-                    buttons[i].setOnAction((event) ->
-                            new Thread(Commands.save).start());
-                    break;
-
-                    /* Вместо ненужного print будет команда remove_last */
-                case print: buttons[i] = new Button("remove_last");
-                    buttons[i].setTooltip(new Tooltip("Удалить последний элемент."));
-                    buttons[i].setOnAction((event -> {
-                        System.err.println(Commands.remove.doIt(TextGenerator.collection.size()));
-                        updateList();
-                    }));
+                    buttons[i].setOnAction((event) -> IO(save));
                     break;
 
                 case generate:buttons[i] = new Button(Commands.generate.name());
@@ -152,13 +156,10 @@ public class TextGenerator extends Application {
         layout.add(bar,0,0);
 
         TextField name = new TextField();
-        name.setText("Имя");
         name.setPromptText("Имя");
         TextField character = new TextField();
-        character.setText("Характер");
         character.setPromptText("Характер");
         TextField location = new TextField();
-        location.setText("Местонахождение");
         location.setPromptText("Местонахождение");
 
         ChoiceBox<Relative> relations = new ChoiceBox<>();

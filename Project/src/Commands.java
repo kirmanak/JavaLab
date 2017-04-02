@@ -21,7 +21,7 @@ import java.util.Vector;
 /**
  * Enumeration команд, использующихся в программе
  */
-enum Commands implements Runnable {
+enum Commands {
     /** Удаляет элемент из коллекции */
     remove {
         public String toString() {
@@ -40,11 +40,6 @@ enum Commands implements Runnable {
     },
     /** Записывает коллекцию в JSON-файл. */
     save {
-        @Override
-        public void run() {
-            System.err.println(doIt());
-        }
-
         public String toString() {
             return "Сохранить коллекцию в JSON-файл.\n";
         }
@@ -61,14 +56,6 @@ enum Commands implements Runnable {
     },
     /** Считывает коллекцию из JSON-файла */
     load {
-        @Override
-        public void run() {
-            synchronized (Commands.load) {
-                System.err.println(doIt());
-                Commands.load.notify();
-            }
-        }
-
         public String toString() {
             return "Cчитать коллекцию из JSON-файла.\n";
         }
@@ -88,18 +75,6 @@ enum Commands implements Runnable {
                 return "Файл ввода не найден. Не буду ничего читать. $jsonFile = " + jsonFile;
             }
             return "Чтение из файла прошло успешно.";
-        }
-    },
-    /** Печатает содержимое коллекции и количество элементов в ней */
-    print {
-        public String toString() {
-            return "Напечатать коллекцию.\n";
-        }
-
-        public String doIt() {
-            StringBuilder string = new StringBuilder();
-            for (Humans humans : TextGenerator.collection) string.append(humans.toString()).append("\n");
-            return string.toString();
         }
     },
     /** Добавляет нового человека */
@@ -214,11 +189,5 @@ enum Commands implements Runnable {
 
     public void action(GridPane pane) {
         System.err.println("Ты забыл добавить действие новой команде.");
-    }
-
-
-    @Override
-    public void run() {
-        System.err.println("Что-то пошло не так.");
     }
 }
