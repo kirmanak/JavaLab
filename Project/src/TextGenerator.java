@@ -1,12 +1,17 @@
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.time.LocalDate;
 import java.util.Vector;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * EntryPoint, читающий консоль, чтобы определить команду, подлежащую выполнению.
@@ -16,11 +21,11 @@ import java.util.concurrent.*;
 public class TextGenerator extends Application {
     /** Сама коллекция  */
     static volatile Vector<Humans> collection = new Vector<>();
-    private static GridPane layout;
-    private static Slider slider;
-    private static double vBoxHeight;
     private static final Runnable load = () -> System.err.println(Commands.load.doIt());
     private static final Runnable save = () -> System.err.println(Commands.save.doIt());
+    static GridPane layout;
+    private static Slider slider;
+    private static double vBoxHeight;
 
     public static void main(String[] args) {
         Runtime.getRuntime().addShutdownHook(new Thread(save));
@@ -39,7 +44,7 @@ public class TextGenerator extends Application {
             Thread.currentThread().interrupt();
         } finally {
             if (!executor.isTerminated()) {
-                System.err.println("Слишком долго обрабатываются данные");
+                System.err.println("Слишком долго обрабатываются данные.");
                 executor.shutdownNow();
             }
         }
@@ -83,7 +88,7 @@ public class TextGenerator extends Application {
                 ", а generate генерирует ровно такое количество новых элементов.";
         dialog.setContentText(help);
         dialog.getDialogPane().getButtonTypes().add(ButtonType.FINISH);
-        //следующая строка честно похищена со stackoverflow для разбиения справки на строки
+        //следующая строка честно похищена со StackOverflow для разбиения справки на строки
         dialog.getDialogPane().getChildren().stream().filter(node -> node instanceof Label).forEach(node -> ((Label)node).setMinHeight(Region.USE_PREF_SIZE));
         return dialog;
     }
@@ -103,6 +108,8 @@ public class TextGenerator extends Application {
         slider.setMinorTickCount(0);
         slider.setSnapToTicks(true);
 
+        //кнопок больше на одну, чем команд из-за remove_last,
+        //для которого я не стал делать отдельную команду
         Button[] buttons = new Button[Commands.values().length+1];
         buttons[0] = new Button("remove_last");
         buttons[0].setTooltip(new Tooltip("Удалить последний элемент."));
@@ -123,7 +130,7 @@ public class TextGenerator extends Application {
                 case add:buttons[i] = new Button(Commands.add.name());
                     buttons[i].setTooltip(new Tooltip(Commands.add.toString()));
                     buttons[i].setOnAction((event) -> {
-                        Commands.add.action(layout);
+                        System.err.println(Commands.add.doIt());
                         updateList();
                     });
                     break;
@@ -135,6 +142,7 @@ public class TextGenerator extends Application {
                         updateList();
                     });
                     break;
+
                 case save:buttons[i] = new Button(Commands.save.name());
                     buttons[i].setTooltip(new Tooltip(Commands.save.toString()));
                     buttons[i].setOnAction((event) -> IO(save));
@@ -186,11 +194,14 @@ public class TextGenerator extends Application {
         layout.add(new Label("место"), 1, 3);
         layout.add(new Label("для"), 1, 4);
         layout.add(new Label("рекламы"), 1, 5);
+
         primaryStage.setTitle("Лабораторная №6");
         primaryStage.setScene(new Scene(layout));
         primaryStage.show();
+
         vBoxHeight = vBox.getHeight();
         updateList();
+        layout.autosize();
         primaryStage.sizeToScene();
         primaryStage.centerOnScreen();
     }

@@ -5,14 +5,9 @@ import javafx.scene.Node;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.util.Random;
@@ -21,7 +16,7 @@ import java.util.Vector;
 /**
  * Enumeration команд, использующихся в программе
  */
-enum Commands {
+enum Commands implements Actions {
     /** Удаляет элемент из коллекции */
     remove {
         public String toString() {
@@ -83,12 +78,12 @@ enum Commands {
             return "Добавить нового человека.\n";
         }
 
-        public void action(GridPane layout) {
+        public String doIt() {
             String name = "", character = "";
             LocalDate time= LocalDate.now();
             Relative relative= Relative.sibling;
             Location location= new Location("");
-            for (Node node : layout.getChildren()) {
+            for (Node node : TextGenerator.layout.getChildren()) {
                 if (node.getClass().equals(TextField.class)) {
                     TextField field = (TextField) node;
                     switch (field.getPromptText()) {
@@ -118,6 +113,7 @@ enum Commands {
                 }
             }
             TextGenerator.collection.add(new Humans(name, character, location, time, relative));
+            return "Новый человек добавлен в коллекцию.";
         }
     },
     /** Генерирует новых людей */
@@ -185,9 +181,5 @@ enum Commands {
      */
     public String doIt(int i) {
         return "Что-то пошло не так.";
-    }
-
-    public void action(GridPane pane) {
-        System.err.println("Ты забыл добавить действие новой команде.");
     }
 }
