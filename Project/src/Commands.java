@@ -1,11 +1,6 @@
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-import javafx.scene.Node;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.HBox;
 
 import java.io.*;
 import java.time.DateTimeException;
@@ -79,39 +74,11 @@ enum Commands implements Actions {
         }
 
         public String doIt() {
-            String name = "", character = "";
-            LocalDate time= LocalDate.now();
-            Relative relative= Relative.sibling;
-            Location location= new Location("");
-            for (Node node : TextGenerator.layout.getChildren()) {
-                if (node.getClass().equals(TextField.class)) {
-                    TextField field = (TextField) node;
-                    switch (field.getPromptText()) {
-                        case "Имя": name = field.getText();
-                            break;
-                        case "Местонахождение": location = new Location(field.getText());
-                            break;
-                        case "Характер": character = field.getText();
-                            break;
-                        default:break;
-                    }
-                }
-                if (node.getClass().equals(HBox.class)) {
-                    //noinspection ConstantConditions
-                    HBox hBox = (HBox) node;
-                    for (Node node1 : hBox.getChildren()) {
-                        if (node1.getClass().equals(DatePicker.class)) {
-                            DatePicker datePicker = (DatePicker) node1;
-                            time = datePicker.getValue();
-                        }
-                        if (node1.getClass().equals(ChoiceBox.class)) {
-                            //noinspection unchecked,ConstantConditions
-                            ChoiceBox<Relative> box = (ChoiceBox<Relative>) node1;
-                            relative = box.getValue();
-                        }
-                    }
-                }
-            }
+            String name = TextGenerator.name.getText(),
+                    character = TextGenerator.character.getText();
+            LocalDate time = TextGenerator.picker.getValue();
+            Relative relative = TextGenerator.relations.getValue();
+            Location location = new Location(TextGenerator.location.getText());
             TextGenerator.collection.add(new Humans(name, character, location, time, relative));
             return "Новый человек добавлен в коллекцию.";
         }

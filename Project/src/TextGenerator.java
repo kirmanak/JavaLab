@@ -23,14 +23,28 @@ public class TextGenerator extends Application {
     static volatile Vector<Humans> collection = new Vector<>();
     private static final Runnable load = () -> System.err.println(Commands.load.doIt());
     private static final Runnable save = () -> System.err.println(Commands.save.doIt());
-    static GridPane layout;
+    static TextField name;
+    static TextField character;
+    static TextField location;
+    static ChoiceBox<Relative> relations;
+    static DatePicker picker;
+    private static GridPane pane;
     private static Slider slider;
-    private static double vBoxHeight;
+    private static VBox addVBox;
+    private static Button removeButton;
+    private static Button generateButton;
+
+
 
     public static void main(String[] args) {
         Runtime.getRuntime().addShutdownHook(new Thread(save));
         IO(load);
-        launch(args);
+        try {
+            launch(args);
+        } catch (Exception e) {
+            System.err.println("Я сломался");
+            e.printStackTrace(System.err);
+        }
     }
 
     /** Метод, осуществляющий ввод/вывод данных из/в файл(а) в отдельном потоке */
@@ -61,10 +75,13 @@ public class TextGenerator extends Application {
         }
         tree.setExpanded(true);
         TreeView<String> view = new TreeView<>(tree);
-        view.setMinWidth(800);
-        view.setMaxHeight(vBoxHeight);
-        view.setMinHeight(vBoxHeight);
-        layout.add(view,0,1);
+        view.setMinWidth(700);
+        view.setMaxHeight(addVBox.getHeight());
+        view.setMinHeight(addVBox.getHeight());
+        pane.add(view, 0, 0);
+        slider.setMinWidth(pane.getWidth()
+                - removeButton.getWidth()
+                - generateButton.getWidth());
         slider.setMax(collection.size());
         if (slider.getMax() == 0) {
             slider.setMin(1);
@@ -72,137 +89,122 @@ public class TextGenerator extends Application {
         }
     }
 
-    /** Метод, создающий диалоговое окно со справкой по программе */
-    private static Dialog helpDialog() {
+    private static Dialog dialogWindow(String header, String content) {
         Dialog dialog = new Dialog();
-        dialog.setTitle("Справка");
-        String help = "Назначение кнопок можно понять по их названиям," +
-                " но назначение остальных элементов не" +
-                " столь очевидно: три текстовых поля ввода используются для команды add," +
-                " которая создаёт новый" +
-                " элемент для коллекции на основе данных из этих трёх полей. Кроме того," +
-                " этой команде нужны ещё" +
-                " дата (не ранее текущего дня) и одно из отношений к Малышу. \n" +
-                "Команды remove и generate используют слайдер, remove удаляет элемент," +
-                " номер которого выбран на слайдере" +
-                ", а generate генерирует ровно такое количество новых элементов.";
-        dialog.setContentText(help);
+        dialog.setTitle(header);
+        dialog.setContentText(content);
         dialog.getDialogPane().getButtonTypes().add(ButtonType.FINISH);
         //следующая строка честно похищена со StackOverflow для разбиения справки на строки
-        dialog.getDialogPane().getChildren().stream().filter(node -> node instanceof Label).forEach(node -> ((Label)node).setMinHeight(Region.USE_PREF_SIZE));
+        dialog.getDialogPane().getChildren().stream()
+                .filter(node -> node instanceof Label)
+                .forEach(node -> ((Label) node).setMinHeight(Region.USE_PREF_SIZE));
         return dialog;
     }
 
     @Override
-    public void start(Stage primaryStage) {
-        layout = new GridPane();
-        Menu menu = new Menu("Справка");
-        MenuItem help = new MenuItem("Получить справку");
-        help.setOnAction((event) -> helpDialog().showAndWait());
-        menu.getItems().add(help);
-
+    public void start(Stage primaryStage) throws Exception {
+        VBox scene = new VBox();
+        HBox hBox = new HBox();
+        pane = new GridPane();
         slider = new Slider(1, collection.size(), 5);
+        addVBox = new VBox();
+        name = new TextField();
+        character = new TextField();
+        location = new TextField();
+        relations = new ChoiceBox<>();
+        picker = new DatePicker(LocalDate.now());
+
+        //для remover'а и генератора
         slider.setShowTickMarks(true);
         slider.setShowTickLabels(true);
         slider.setMajorTickUnit(1);
         slider.setMinorTickCount(0);
         slider.setSnapToTicks(true);
+        removeButton = new Button("Удалить");
+        generateButton = new Button("Сгенерировать");
+        hBox.getChildren().addAll(slider, removeButton, generateButton);
 
-        //кнопок больше на одну, чем команд из-за remove_last,
-        //для которого я не стал делать отдельную команду
-        Button[] buttons = new Button[Commands.values().length+1];
-        buttons[0] = new Button("remove_last");
-        buttons[0].setTooltip(new Tooltip("Удалить последний элемент."));
-        buttons[0].setOnAction((event -> {
-            System.err.println(Commands.remove.doIt(TextGenerator.collection.size()));
-            updateList();
-        }));
-        for (int i = 1; i < buttons.length; i++) {
-            switch (Commands.values()[i-1]) {
-                case remove: buttons[i] = new Button(Commands.remove.name());
-                    buttons[i].setTooltip(new Tooltip(Commands.remove.toString()));
-                    buttons[i].setOnAction((event) -> {
-                        System.err.println(Commands.remove.doIt((int) slider.getValue()));
-                        updateList();
-                    });
-                    break;
+        Menu fileMenu = new Menu("Файл");
+        MenuItem saveOption = new MenuItem("Сохранить");
+        MenuItem loadOption = new MenuItem("Загрузить");
+        fileMenu.getItems().addAll(loadOption, saveOption);
+        Menu optionsMenu = new Menu("Операции");
+        MenuItem removeLastOption = new MenuItem("Удалить последнего");
+        MenuItem addOption = new MenuItem("Добавить нового");
+        optionsMenu.getItems().addAll(addOption, removeLastOption);
+        MenuBar bar = new MenuBar();
+        Menu helpMenu = new Menu("Справка");
+        MenuItem helpOption = new MenuItem("Получить справку");
+        helpMenu.getItems().add(helpOption);
+        String help = "В левой части программы Вы можете видеть Вашу коллекцию" +
+                " элементов класса Humans. В правой части вы можете описать новый" +
+                " элемент и затем добавить его при помощи подменю \"" + addOption.getText()
+                + "\" в меню \"" + optionsMenu.getText() + "\". \n" +
+                " Кроме того, новый элемент вы можете добавить при помощи слайдера. Слайдером" +
+                " указываете сколько новых элементов необходимо сгенерировать, затем жмёте \""
+                + generateButton.getText() + "\". Наверняка, вас повеселит результат.\n" +
+                " С помощью слайдера можно удалить какой-то конкретный элемент в коллекции," +
+                " указав слайдером его номер и нажав \"" + removeButton.getText() + "\".\n" +
+                "\n" +
+                "Автор - Камакин Кирилл, P3102." +
+                "\n СПб, 2к17.";
+        bar.getMenus().addAll(fileMenu, optionsMenu, helpMenu);
 
-                case add:buttons[i] = new Button(Commands.add.name());
-                    buttons[i].setTooltip(new Tooltip(Commands.add.toString()));
-                    buttons[i].setOnAction((event) -> {
-                        System.err.println(Commands.add.doIt());
-                        updateList();
-                    });
-                    break;
-
-                case load:buttons[i] = new Button(Commands.load.name());
-                    buttons[i].setTooltip(new Tooltip(Commands.load.toString()));
-                    buttons[i].setOnAction((event) -> {
-                        IO(load);
-                        updateList();
-                    });
-                    break;
-
-                case save:buttons[i] = new Button(Commands.save.name());
-                    buttons[i].setTooltip(new Tooltip(Commands.save.toString()));
-                    buttons[i].setOnAction((event) -> IO(save));
-                    break;
-
-                case generate:buttons[i] = new Button(Commands.generate.name());
-                    buttons[i].setTooltip(new Tooltip(Commands.generate.toString()));
-                    buttons[i].setOnAction((event) -> {
-                        System.err.println(Commands.generate.doIt((int) slider.getValue()));
-                        updateList();
-                    });
-                    break;
-
-                default:
-                    System.err.println("Ты забыл добавить новую команду.");
-            }
-        }
-        VBox vBox = new VBox();
-        vBox.getChildren().addAll(buttons);
-
-        layout.add(vBox,1,1);
-        MenuBar bar = new MenuBar(menu);
-        layout.add(bar,0,0);
-
-        TextField name = new TextField();
+        //для добавления нового человека
         name.setPromptText("Имя");
-        TextField character = new TextField();
         character.setPromptText("Характер");
-        TextField location = new TextField();
         location.setPromptText("Местонахождение");
-
-        ChoiceBox<Relative> relations = new ChoiceBox<>();
         relations.getItems().addAll(Relative.values());
         relations.setValue(Relative.sibling);
-        DatePicker picker = new DatePicker(LocalDate.now());
+        HBox box = new HBox(relations, picker);
+
+        addVBox.getChildren().addAll(new Label("Информация о новом элементе:"),
+                name, character, location, box);
+        pane.add(addVBox, 1, 0);
+        scene.getChildren().addAll(bar, pane, hBox);
+
         picker.setOnAction((event) -> {
             if (picker.getValue().toEpochDay()<LocalDate.now().toEpochDay())
                 picker.setValue(LocalDate.now());
         });
-        HBox hBox = new HBox(relations,picker);
+        saveOption.setOnAction((event) -> IO(save));
+        loadOption.setOnAction((event) -> {
+            IO(load);
+            updateList();
+        });
+        removeButton.setOnAction((event) -> {
+            System.err.println(Commands.remove.doIt((int) slider.getValue()));
+            updateList();
+        });
+        generateButton.setOnAction((event) -> {
+            System.err.println(Commands.generate.doIt((int) slider.getValue()));
+            updateList();
+        });
+        removeLastOption.setOnAction((event) -> {
+            System.err.println(Commands.remove.doIt(TextGenerator.collection.size()));
+            updateList();
+        });
+        addOption.setOnAction((event) -> {
+            if (name.getText().isEmpty() ||
+                    character.getText().isEmpty() || location.getText().isEmpty()) {
+                System.err.println("Пустые поля для ввода");
+                String errText = "Вы должны заполнить поля " + name.getPromptText() +
+                        ", " + character.getPromptText() + ", " + location.getPromptText();
+                dialogWindow("Ошибка", errText).showAndWait();
+            } else {
+                System.err.println(Commands.add.doIt());
+                updateList();
+            }
+        });
+        helpOption.setOnAction((event) -> dialogWindow("Справка", help).showAndWait());
 
-        layout.add(name,0,2);
-        layout.add(character,0,3);
-        layout.add(location,0,4);
-        layout.add(hBox,0,5);
-        layout.add(slider,1,0);
-
-        layout.add(new Label("Вакантное"), 1, 2);
-        layout.add(new Label("место"), 1, 3);
-        layout.add(new Label("для"), 1, 4);
-        layout.add(new Label("рекламы"), 1, 5);
-
+        primaryStage.setScene(new Scene(scene));
         primaryStage.setTitle("Лабораторная №6");
-        primaryStage.setScene(new Scene(layout));
         primaryStage.show();
-
-        vBoxHeight = vBox.getHeight();
         updateList();
-        layout.autosize();
         primaryStage.sizeToScene();
         primaryStage.centerOnScreen();
+        primaryStage.setResizable(false);
+        updateList();
     }
 }
