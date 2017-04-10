@@ -1,3 +1,5 @@
+package ru.ifmo.se.kirmanak;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 /** Отношения людей с Малышом */

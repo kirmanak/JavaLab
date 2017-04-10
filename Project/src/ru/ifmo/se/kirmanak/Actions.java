@@ -1,3 +1,5 @@
+package ru.ifmo.se.kirmanak;
+
 /**
  * Интерфейс для команд
  */

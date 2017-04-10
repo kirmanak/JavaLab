@@ -1,3 +1,5 @@
+package ru.ifmo.se.kirmanak;
+
 /**
  * Отношения с Малышом
  */

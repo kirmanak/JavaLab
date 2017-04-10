@@ -1,3 +1,5 @@
+package ru.ifmo.se.kirmanak;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
@@ -20,8 +22,8 @@ enum Commands implements Actions {
 
         public String doIt(int index) {
             index--;
-            if (index < TextGenerator.collection.size() && index >= 0) {
-                TextGenerator.collection.remove(index);
+            if (index < Main.collection.size() && index >= 0) {
+                Main.collection.remove(index);
                 return String.format("%d-й элемент удалён", index+1);
             } else {
                 return "Нет такого элемента.";
@@ -37,7 +39,7 @@ enum Commands implements Actions {
         public String doIt() {
             try (PrintWriter pw = new PrintWriter(new File(jsonFile))) {
                 pw.flush();
-                pw.print(gson.toJson(TextGenerator.collection));
+                pw.print(gson.toJson(Main.collection));
             } catch (IOException | NullPointerException err) {
                 return "Файл вывода не найден. Не буду ничего писать. $jsonFile = " + jsonFile;
             }
@@ -55,7 +57,7 @@ enum Commands implements Actions {
                 String read = br.readLine();
                 if (!(read == null || read.isEmpty())) {
                     try {
-                        TextGenerator.collection = gson.fromJson(read, new TypeToken<Vector<Humans>>() {
+                        Main.collection = gson.fromJson(read, new TypeToken<Vector<Humans>>() {
                         }.getType());
                     } catch (JsonSyntaxException err) {
                         return "Ошибка чтения коллекции из файла.";
@@ -74,12 +76,12 @@ enum Commands implements Actions {
         }
 
         public String doIt() {
-            String name = TextGenerator.name.getText(),
-                    character = TextGenerator.character.getText();
-            LocalDate time = TextGenerator.picker.getValue();
-            Relative relative = TextGenerator.relations.getValue();
-            Location location = new Location(TextGenerator.location.getText());
-            TextGenerator.collection.add(new Humans(name, character, location, time, relative));
+            String name = Main.name.getText(),
+                    character = Main.character.getText();
+            LocalDate time = Main.picker.getValue();
+            Relative relative = Main.relations.getValue();
+            Location location = new Location(Main.location.getText());
+            Main.collection.add(new Humans(name, character, location, time, relative));
             return "Новый человек добавлен в коллекцию.";
         }
     },
@@ -94,7 +96,7 @@ enum Commands implements Actions {
             String name = names[randomize.nextInt(names.length)];
             LocalDate time = LocalDate.now();
             try {
-                 time = LocalDate.ofEpochDay(LocalDate.now().toEpochDay() + Math.abs(randomize.nextInt(365)));
+                time = LocalDate.ofEpochDay(LocalDate.now().toEpochDay() + Math.abs(randomize.nextInt(365)));
             } catch (DateTimeException err) {
                 System.err.println(err.getLocalizedMessage());
             }
@@ -111,7 +113,7 @@ enum Commands implements Actions {
         public String doIt(int amountOfElements) {
             if (amountOfElements >= 0 && amountOfElements <= 100) {
                 for (int i = 0; i < amountOfElements; i++) {
-                    TextGenerator.collection.add(generate());
+                    Main.collection.add(generate());
                 }
                 return "Сгенерировал " + amountOfElements + " элементов.";
             } else {

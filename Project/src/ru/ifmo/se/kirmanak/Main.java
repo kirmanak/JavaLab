@@ -1,3 +1,5 @@
+package ru.ifmo.se.kirmanak;
+
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -18,7 +20,7 @@ import java.util.concurrent.TimeUnit;
  * Работает с файлом, записанным в переменную окружения под названием jsonFile.
  */
 
-public class TextGenerator extends Application {
+public class Main extends Application {
     /** Сама коллекция  */
     static volatile Vector<Humans> collection = new Vector<>();
     private static final Runnable load = () -> System.err.println(Commands.load.doIt());
@@ -33,8 +35,6 @@ public class TextGenerator extends Application {
     private static VBox addVBox;
     private static Button removeButton;
     private static Button generateButton;
-
-
 
     public static void main(String[] args) {
         Runtime.getRuntime().addShutdownHook(new Thread(save));
@@ -67,7 +67,7 @@ public class TextGenerator extends Application {
     /** Метод для обновления отображаемой коллекции в случае её изменения*/
     private static void updateList () {
         TreeItem<String> tree = new TreeItem<>("Коллекция: ");
-        for (Humans humans : TextGenerator.collection) {
+        for (Humans humans : Main.collection) {
             TreeItem<String> item =
                     new TreeItem<>(humans.getName());
             item.getChildren().add(new TreeItem<>(humans.toString()));
@@ -103,8 +103,8 @@ public class TextGenerator extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        VBox scene = new VBox();
-        HBox hBox = new HBox();
+        VBox rootNode = new VBox();
+        HBox sliderHBox = new HBox();
         pane = new GridPane();
         slider = new Slider(1, collection.size(), 5);
         addVBox = new VBox();
@@ -122,7 +122,7 @@ public class TextGenerator extends Application {
         slider.setSnapToTicks(true);
         removeButton = new Button("Удалить");
         generateButton = new Button("Сгенерировать");
-        hBox.getChildren().addAll(slider, removeButton, generateButton);
+        sliderHBox.getChildren().addAll(slider, removeButton, generateButton);
 
         Menu fileMenu = new Menu("Файл");
         MenuItem saveOption = new MenuItem("Сохранить");
@@ -132,12 +132,12 @@ public class TextGenerator extends Application {
         MenuItem removeLastOption = new MenuItem("Удалить последнего");
         MenuItem addOption = new MenuItem("Добавить нового");
         optionsMenu.getItems().addAll(addOption, removeLastOption);
-        MenuBar bar = new MenuBar();
+        MenuBar menuBar = new MenuBar();
         Menu helpMenu = new Menu("Справка");
         MenuItem helpOption = new MenuItem("Получить справку");
         helpMenu.getItems().add(helpOption);
         String help = "В левой части программы Вы можете видеть Вашу коллекцию" +
-                " элементов класса Humans. В правой части вы можете описать новый" +
+                " элементов класса ru.ifmo.se.kirmanak.Humans. В правой части вы можете описать новый" +
                 " элемент и затем добавить его при помощи подменю \"" + addOption.getText()
                 + "\" в меню \"" + optionsMenu.getText() + "\". \n" +
                 " Кроме того, новый элемент вы можете добавить при помощи слайдера. Слайдером" +
@@ -148,7 +148,7 @@ public class TextGenerator extends Application {
                 "\n" +
                 "Автор - Камакин Кирилл, P3102." +
                 "\n СПб, 2к17.";
-        bar.getMenus().addAll(fileMenu, optionsMenu, helpMenu);
+        menuBar.getMenus().addAll(fileMenu, optionsMenu, helpMenu);
 
         //для добавления нового человека
         name.setPromptText("Имя");
@@ -161,7 +161,7 @@ public class TextGenerator extends Application {
         addVBox.getChildren().addAll(new Label("Информация о новом элементе:"),
                 name, character, location, box);
         pane.add(addVBox, 1, 0);
-        scene.getChildren().addAll(bar, pane, hBox);
+        rootNode.getChildren().addAll(menuBar, pane, sliderHBox);
 
         picker.setOnAction((event) -> {
             if (picker.getValue().toEpochDay()<LocalDate.now().toEpochDay())
@@ -181,7 +181,7 @@ public class TextGenerator extends Application {
             updateList();
         });
         removeLastOption.setOnAction((event) -> {
-            System.err.println(Commands.remove.doIt(TextGenerator.collection.size()));
+            System.err.println(Commands.remove.doIt(Main.collection.size()));
             updateList();
         });
         addOption.setOnAction((event) -> {
@@ -198,7 +198,7 @@ public class TextGenerator extends Application {
         });
         helpOption.setOnAction((event) -> dialogWindow("Справка", help).showAndWait());
 
-        primaryStage.setScene(new Scene(scene));
+        primaryStage.setScene(new Scene(rootNode));
         primaryStage.setTitle("Лабораторная №6");
         primaryStage.show();
         updateList();
@@ -206,5 +206,6 @@ public class TextGenerator extends Application {
         primaryStage.centerOnScreen();
         primaryStage.setResizable(false);
         updateList();
+        slider.requestFocus();
     }
 }
