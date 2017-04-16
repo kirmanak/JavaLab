@@ -13,7 +13,7 @@ import java.time.LocalDate;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Future;
 
 /**
  * EntryPoint, создающий графический интерфейс и обрабатывающий действия пользователя.
@@ -21,10 +21,9 @@ import java.util.concurrent.TimeUnit;
  */
 
 public class Main extends Application {
+    private static final ExecutorService executor = Executors.newCachedThreadPool();
     /** Сама коллекция  */
-    static volatile Vector<Humans> collection = new Vector<>();
-    private static final Runnable load = () -> System.err.println(Commands.load.doIt());
-    private static final Runnable save = () -> System.err.println(Commands.save.doIt());
+    static Vector<Humans> collection = new Vector<>();
     static TextField name;
     static TextField character;
     static TextField location;
@@ -37,31 +36,28 @@ public class Main extends Application {
     private static Button generateButton;
 
     public static void main(String[] args) {
-        Runtime.getRuntime().addShutdownHook(new Thread(save));
-        IO(load);
         try {
-            launch(args);
+            launch();
         } catch (Exception e) {
             System.err.println("Я сломался");
             e.printStackTrace(System.err);
         }
     }
 
-    /** Метод, осуществляющий ввод/вывод данных из/в файл(а) в отдельном потоке */
-    private static void IO (Runnable runnable) {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(runnable);
-        try {
-            executor.shutdown();
-            executor.awaitTermination(5, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        } finally {
-            if (!executor.isTerminated()) {
-                System.err.println("Слишком долго обрабатываются данные.");
-                executor.shutdownNow();
+    /**
+     * Метод, осуществляющий чтение данных из файла в отдельном потоке
+     */
+    private static void load() {
+        final Runnable load = () -> System.err.println(Commands.load.doIt());
+        Future<?> result = executor.submit(load);
+        while (!result.isDone()) {
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }
+        updateList();
     }
 
     /** Метод для обновления отображаемой коллекции в случае её изменения*/
@@ -103,8 +99,8 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        VBox rootNode = new VBox();
-        HBox sliderHBox = new HBox();
+        final VBox rootNode = new VBox();
+        final HBox sliderHBox = new HBox();
         pane = new GridPane();
         slider = new Slider(1, collection.size(), 5);
         addVBox = new VBox();
@@ -113,6 +109,7 @@ public class Main extends Application {
         location = new TextField();
         relations = new ChoiceBox<>();
         picker = new DatePicker(LocalDate.now());
+        final Runnable save = () -> System.err.println(Commands.save.doIt());
 
         //для remover'а и генератора
         slider.setShowTickMarks(true);
@@ -124,30 +121,29 @@ public class Main extends Application {
         generateButton = new Button("Сгенерировать");
         sliderHBox.getChildren().addAll(slider, removeButton, generateButton);
 
-        Menu fileMenu = new Menu("Файл");
-        MenuItem saveOption = new MenuItem("Сохранить");
-        MenuItem loadOption = new MenuItem("Загрузить");
+        final Menu fileMenu = new Menu("Файл");
+        final MenuItem saveOption = new MenuItem("Сохранить");
+        final MenuItem loadOption = new MenuItem("Загрузить");
         fileMenu.getItems().addAll(loadOption, saveOption);
-        Menu optionsMenu = new Menu("Операции");
-        MenuItem removeLastOption = new MenuItem("Удалить последнего");
-        MenuItem addOption = new MenuItem("Добавить нового");
+        final Menu optionsMenu = new Menu("Операции");
+        final MenuItem removeLastOption = new MenuItem("Удалить последнего");
+        final MenuItem addOption = new MenuItem("Добавить нового");
         optionsMenu.getItems().addAll(addOption, removeLastOption);
-        MenuBar menuBar = new MenuBar();
-        Menu helpMenu = new Menu("Справка");
-        MenuItem helpOption = new MenuItem("Получить справку");
+        final MenuBar menuBar = new MenuBar();
+        final Menu helpMenu = new Menu("Справка");
+        final MenuItem helpOption = new MenuItem("Получить справку");
         helpMenu.getItems().add(helpOption);
-        String help = "В левой части программы Вы можете видеть Вашу коллекцию" +
+        final String help = "В левой части программы Вы можете видеть Вашу коллекцию" +
                 " элементов класса ru.ifmo.se.kirmanak.Humans. В правой части вы можете описать новый" +
                 " элемент и затем добавить его при помощи подменю \"" + addOption.getText()
                 + "\" в меню \"" + optionsMenu.getText() + "\". \n" +
-                " Кроме того, новый элемент вы можете добавить при помощи слайдера. Слайдером" +
+                "Кроме того, новый элемент вы можете добавить при помощи слайдера. Слайдером" +
                 " указываете сколько новых элементов необходимо сгенерировать, затем жмёте \""
                 + generateButton.getText() + "\". Наверняка, вас повеселит результат.\n" +
-                " С помощью слайдера можно удалить какой-то конкретный элемент в коллекции," +
+                "С помощью слайдера можно удалить какой-то конкретный элемент в коллекции," +
                 " указав слайдером его номер и нажав \"" + removeButton.getText() + "\".\n" +
-                "\n" +
-                "Автор - Камакин Кирилл, P3102." +
-                "\n СПб, 2к17.";
+                "\nАвтор - Камакин Кирилл, P3102." +
+                "\nСПб, 2017.";
         menuBar.getMenus().addAll(fileMenu, optionsMenu, helpMenu);
 
         //для добавления нового человека
@@ -156,7 +152,7 @@ public class Main extends Application {
         location.setPromptText("Местонахождение");
         relations.getItems().addAll(Relative.values());
         relations.setValue(Relative.sibling);
-        HBox box = new HBox(relations, picker);
+        final HBox box = new HBox(relations, picker);
 
         addVBox.getChildren().addAll(new Label("Информация о новом элементе:"),
                 name, character, location, box);
@@ -167,11 +163,8 @@ public class Main extends Application {
             if (picker.getValue().toEpochDay()<LocalDate.now().toEpochDay())
                 picker.setValue(LocalDate.now());
         });
-        saveOption.setOnAction((event) -> IO(save));
-        loadOption.setOnAction((event) -> {
-            IO(load);
-            updateList();
-        });
+        saveOption.setOnAction((event) -> executor.submit(save));
+        loadOption.setOnAction(event -> load());
         removeButton.setOnAction((event) -> {
             System.err.println(Commands.remove.doIt((int) slider.getValue()));
             updateList();
@@ -198,14 +191,19 @@ public class Main extends Application {
         });
         helpOption.setOnAction((event) -> dialogWindow("Справка", help).showAndWait());
 
+        load();
+        rootNode.autosize();
         primaryStage.setScene(new Scene(rootNode));
         primaryStage.setTitle("Лабораторная №6");
         primaryStage.show();
-        updateList();
         primaryStage.sizeToScene();
         primaryStage.centerOnScreen();
         primaryStage.setResizable(false);
         updateList();
         slider.requestFocus();
+        primaryStage.setOnCloseRequest(event -> {
+            executor.submit(save);
+            executor.shutdown();
+        });
     }
 }

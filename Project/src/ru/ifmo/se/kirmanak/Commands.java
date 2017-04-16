@@ -13,7 +13,7 @@ import java.util.Vector;
 /**
  * Enumeration команд, использующихся в программе
  */
-enum Commands implements Actions {
+enum Commands {
     /** Удаляет элемент из коллекции */
     remove {
         public String toString() {
