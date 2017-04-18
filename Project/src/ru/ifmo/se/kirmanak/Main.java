@@ -11,7 +11,10 @@ import javafx.stage.Stage;
 
 import java.time.LocalDate;
 import java.util.Vector;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Future;
 
 /**
  * EntryPoint, создающий графический интерфейс и обрабатывающий действия пользователя.
@@ -153,7 +156,7 @@ public class Main extends Application {
             if (picker.getValue().toEpochDay()<LocalDate.now().toEpochDay())
                 picker.setValue(LocalDate.now());
         });
-        final ExecutorService pool = Executors.newSingleThreadExecutor();
+        final ForkJoinPool pool = new ForkJoinPool();
         saveOption.setOnAction((event) -> {
             Runnable runnable = () -> System.err.println(Commands.save.doIt());
             pool.submit(runnable);
