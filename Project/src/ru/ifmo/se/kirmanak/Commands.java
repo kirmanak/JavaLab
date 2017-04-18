@@ -36,7 +36,7 @@ enum Commands {
             return "Сохранить коллекцию в JSON-файл.\n";
         }
 
-        public String doIt() {
+        public synchronized String doIt() {
             try (PrintWriter pw = new PrintWriter(new File(jsonFile))) {
                 pw.flush();
                 pw.print(gson.toJson(Main.collection));
@@ -52,7 +52,7 @@ enum Commands {
             return "Cчитать коллекцию из JSON-файла.\n";
         }
 
-        public String doIt() {
+        public synchronized String doIt() {
             try (BufferedReader br = new BufferedReader(new FileReader(jsonFile))) {
                 String read = br.readLine();
                 if (!(read == null || read.isEmpty())) {
