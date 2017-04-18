@@ -11,9 +11,10 @@ import javafx.stage.Stage;
 
 import java.time.LocalDate;
 import java.util.Vector;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * EntryPoint, создающий графический интерфейс и обрабатывающий действия пользователя.
@@ -21,7 +22,6 @@ import java.util.concurrent.Future;
  */
 
 public class Main extends Application {
-    private static final ExecutorService executor = Executors.newCachedThreadPool();
     /** Сама коллекция  */
     static Vector<Humans> collection = new Vector<>();
     static TextField name;
@@ -42,22 +42,6 @@ public class Main extends Application {
             System.err.println("Я сломался");
             e.printStackTrace(System.err);
         }
-    }
-
-    /**
-     * Метод, осуществляющий чтение данных из файла в отдельном потоке
-     */
-    private static void load() {
-        final Runnable load = () -> System.err.println(Commands.load.doIt());
-        Future<?> result = executor.submit(load);
-        while (!result.isDone()) {
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
-        updateList();
     }
 
     /** Метод для обновления отображаемой коллекции в случае её изменения*/
@@ -85,6 +69,9 @@ public class Main extends Application {
         }
     }
 
+    /**
+     * Метод, конструирующий диалоговые окна, готовые к отображению
+     */
     private static Dialog dialogWindow(String header, String content) {
         Dialog dialog = new Dialog();
         dialog.setTitle(header);
@@ -109,7 +96,6 @@ public class Main extends Application {
         location = new TextField();
         relations = new ChoiceBox<>();
         picker = new DatePicker(LocalDate.now());
-        final Runnable save = () -> System.err.println(Commands.save.doIt());
 
         //для remover'а и генератора
         slider.setShowTickMarks(true);
@@ -121,6 +107,7 @@ public class Main extends Application {
         generateButton = new Button("Сгенерировать");
         sliderHBox.getChildren().addAll(slider, removeButton, generateButton);
 
+        //для меню
         final Menu fileMenu = new Menu("Файл");
         final MenuItem saveOption = new MenuItem("Сохранить");
         final MenuItem loadOption = new MenuItem("Загрузить");
@@ -134,16 +121,15 @@ public class Main extends Application {
         final MenuItem helpOption = new MenuItem("Получить справку");
         helpMenu.getItems().add(helpOption);
         final String help = "В левой части программы Вы можете видеть Вашу коллекцию" +
-                " элементов класса ru.ifmo.se.kirmanak.Humans. В правой части вы можете описать новый" +
+                " элементов класса Humans. В правой части вы можете описать новый" +
                 " элемент и затем добавить его при помощи подменю \"" + addOption.getText()
-                + "\" в меню \"" + optionsMenu.getText() + "\". \n" +
+                + "\" в меню \"" + optionsMenu.getText() + "\".\n" +
                 "Кроме того, новый элемент вы можете добавить при помощи слайдера. Слайдером" +
                 " указываете сколько новых элементов необходимо сгенерировать, затем жмёте \""
                 + generateButton.getText() + "\". Наверняка, вас повеселит результат.\n" +
                 "С помощью слайдера можно удалить какой-то конкретный элемент в коллекции," +
                 " указав слайдером его номер и нажав \"" + removeButton.getText() + "\".\n" +
-                "\nАвтор - Камакин Кирилл, P3102." +
-                "\nСПб, 2017.";
+                "\nАвтор - Камакин Кирилл, P3102.\nСПб, 2017.";
         menuBar.getMenus().addAll(fileMenu, optionsMenu, helpMenu);
 
         //для добавления нового человека
@@ -153,18 +139,38 @@ public class Main extends Application {
         relations.getItems().addAll(Relative.values());
         relations.setValue(Relative.sibling);
         final HBox box = new HBox(relations, picker);
-
         addVBox.getChildren().addAll(new Label("Информация о новом элементе:"),
                 name, character, location, box);
+        //элемент (0;0) добавляется в updateList()
         pane.add(addVBox, 1, 0);
+
         rootNode.getChildren().addAll(menuBar, pane, sliderHBox);
 
+        //описание setOnAction-ов
         picker.setOnAction((event) -> {
             if (picker.getValue().toEpochDay()<LocalDate.now().toEpochDay())
                 picker.setValue(LocalDate.now());
         });
-        saveOption.setOnAction((event) -> executor.submit(save));
-        loadOption.setOnAction(event -> load());
+        final ExecutorService pool = Executors.newSingleThreadExecutor();
+        saveOption.setOnAction((event) ->
+                pool.submit(
+                        () -> System.err.println(Commands.save.doIt())));
+        loadOption.setOnAction((event) -> {
+            try {
+                System.err.println(
+                        pool.submit((Callable<String>) Commands.load::doIt)
+                                .get()
+                );
+                updateList();
+            } catch (InterruptedException err) {
+                System.err.println(Thread.currentThread().getName() + " interrupted.");
+                Thread.currentThread().interrupt();
+                err.printStackTrace(System.err);
+            } catch (ExecutionException err) {
+                System.err.println("Что-то пошло не так при загрузке данных: ");
+                err.getCause().printStackTrace(System.err);
+            }
+        });
         removeButton.setOnAction((event) -> {
             System.err.println(Commands.remove.doIt((int) slider.getValue()));
             updateList();
@@ -191,7 +197,8 @@ public class Main extends Application {
         });
         helpOption.setOnAction((event) -> dialogWindow("Справка", help).showAndWait());
 
-        load();
+        //отрисовываем
+        loadOption.fire();
         rootNode.autosize();
         primaryStage.setScene(new Scene(rootNode));
         primaryStage.setTitle("Лабораторная №6");
@@ -202,8 +209,8 @@ public class Main extends Application {
         updateList();
         slider.requestFocus();
         primaryStage.setOnCloseRequest(event -> {
-            executor.submit(save);
-            executor.shutdown();
+            saveOption.fire();
+            pool.shutdown();
         });
     }
 }
