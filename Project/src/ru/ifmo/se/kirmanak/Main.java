@@ -11,10 +11,7 @@ import javafx.stage.Stage;
 
 import java.time.LocalDate;
 import java.util.Vector;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 /**
  * EntryPoint, создающий графический интерфейс и обрабатывающий действия пользователя.
@@ -23,7 +20,7 @@ import java.util.concurrent.Executors;
 
 public class Main extends Application {
     /** Сама коллекция  */
-    static Vector<Humans> collection = new Vector<>();
+    static volatile Vector<Humans> collection = new Vector<>();
     static TextField name;
     static TextField character;
     static TextField location;
@@ -129,7 +126,10 @@ public class Main extends Application {
                 + generateButton.getText() + "\". Наверняка, вас повеселит результат.\n" +
                 "С помощью слайдера можно удалить какой-то конкретный элемент в коллекции," +
                 " указав слайдером его номер и нажав \"" + removeButton.getText() + "\".\n" +
-                "\nАвтор - Камакин Кирилл, P3102.\nСПб, 2017.";
+                "Есть так же команды \"" + loadOption.getText() + "\" и \"" + saveOption.getText()
+                + "\" в подменю \"" + fileMenu.getText() + "\", причём первая выполняется " +
+                "при каждой загрузке, а вторая при каждом выходе из программы.\n" +
+                "\nАвтор - Камакин Кирилл, гр. P3102.\nСПб, 2017.";
         menuBar.getMenus().addAll(fileMenu, optionsMenu, helpMenu);
 
         //для добавления нового человека
@@ -148,19 +148,22 @@ public class Main extends Application {
 
         //описание setOnAction-ов
         picker.setOnAction((event) -> {
+            //нельзя установить дату грядущего возвращения ранее,
+            //чем сегодня
             if (picker.getValue().toEpochDay()<LocalDate.now().toEpochDay())
                 picker.setValue(LocalDate.now());
         });
         final ExecutorService pool = Executors.newSingleThreadExecutor();
-        saveOption.setOnAction((event) ->
-                pool.submit(
-                        () -> System.err.println(Commands.save.doIt())));
+        saveOption.setOnAction((event) -> {
+            Runnable runnable = () -> System.err.println(Commands.save.doIt());
+            pool.submit(runnable);
+        });
         loadOption.setOnAction((event) -> {
+            Callable<String> callable = Commands.load::doIt;
             try {
-                System.err.println(
-                        pool.submit((Callable<String>) Commands.load::doIt)
-                                .get()
-                );
+                Future<String> future = pool.submit(callable);
+                String resultOfLoading = future.get();
+                System.err.println(resultOfLoading);
                 updateList();
             } catch (InterruptedException err) {
                 System.err.println(Thread.currentThread().getName() + " interrupted.");
@@ -185,7 +188,8 @@ public class Main extends Application {
         });
         addOption.setOnAction((event) -> {
             if (name.getText().isEmpty() ||
-                    character.getText().isEmpty() || location.getText().isEmpty()) {
+                    character.getText().isEmpty() ||
+                    location.getText().isEmpty()) {
                 System.err.println("Пустые поля для ввода");
                 String errText = "Вы должны заполнить поля " + name.getPromptText() +
                         ", " + character.getPromptText() + ", " + location.getPromptText();
