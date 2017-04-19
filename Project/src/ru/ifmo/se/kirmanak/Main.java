@@ -11,10 +11,7 @@ import javafx.stage.Stage;
 
 import java.time.LocalDate;
 import java.util.Vector;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.Future;
 
 /**
  * EntryPoint, создающий графический интерфейс и обрабатывающий действия пользователя.
@@ -153,29 +150,18 @@ public class Main extends Application {
         picker.setOnAction((event) -> {
             //нельзя установить дату грядущего возвращения ранее,
             //чем сегодня
-            if (picker.getValue().toEpochDay()<LocalDate.now().toEpochDay())
+            if (picker.getValue() == null || picker.getValue().toEpochDay() < LocalDate.now().toEpochDay())
                 picker.setValue(LocalDate.now());
         });
         final ForkJoinPool pool = new ForkJoinPool();
         saveOption.setOnAction((event) -> {
             Runnable runnable = () -> System.err.println(Commands.save.doIt());
-            pool.submit(runnable);
+            pool.submit(runnable).join();
         });
         loadOption.setOnAction((event) -> {
-            Callable<String> callable = Commands.load::doIt;
-            try {
-                Future<String> future = pool.submit(callable);
-                String resultOfLoading = future.get();
-                System.err.println(resultOfLoading);
-                updateList();
-            } catch (InterruptedException err) {
-                System.err.println(Thread.currentThread().getName() + " interrupted.");
-                Thread.currentThread().interrupt();
-                err.printStackTrace(System.err);
-            } catch (ExecutionException err) {
-                System.err.println("Что-то пошло не так при загрузке данных: ");
-                err.getCause().printStackTrace(System.err);
-            }
+            Runnable runnable = () -> System.err.println(Commands.load.doIt());
+            pool.submit(runnable).join();
+            updateList();
         });
         removeButton.setOnAction((event) -> {
             System.err.println(Commands.remove.doIt((int) slider.getValue()));

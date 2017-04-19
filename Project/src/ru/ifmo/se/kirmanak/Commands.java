@@ -76,11 +76,11 @@ enum Commands {
         }
 
         public String doIt() {
-            String name = Main.name.getText(),
-                    character = Main.character.getText();
+            String name = Main.name.getText().trim(),
+                    character = Main.character.getText().trim();
             LocalDate time = Main.picker.getValue();
             Relative relative = Main.relations.getValue();
-            Location location = new Location(Main.location.getText());
+            Location location = new Location(Main.location.getText().trim());
             Main.collection.add(new Humans(name, character, location, time, relative));
             return "Новый человек добавлен в коллекцию.";
         }
