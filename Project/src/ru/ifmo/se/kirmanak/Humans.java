@@ -3,7 +3,6 @@ package ru.ifmo.se.kirmanak;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 /** Отношения людей с Малышом */
-@SuppressWarnings("WeakerAccess")
 class Humans implements Comparable<Humans> {
     /** Имя */
     private final String name;
@@ -15,7 +14,6 @@ class Humans implements Comparable<Humans> {
     private final LocalDate time;
     /** Место, в котором находится человек */
     private final Location location;
-    private int hash = 0;
 
     /**
      * @param name      Имя человека
@@ -60,10 +58,7 @@ class Humans implements Comparable<Humans> {
     }
 
     public int hashCode () {
-        if (this.hash == 0) {
-            this.hash = this.getName().length() + this.getRelative().toString().length();
-        }
-        return this.hash;
+        return this.getName().length() + this.getRelative().toString().length();
     }
 
     @Override

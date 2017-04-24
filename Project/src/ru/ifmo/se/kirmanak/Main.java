@@ -1,6 +1,8 @@
 package ru.ifmo.se.kirmanak;
 
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.collections.ListChangeListener;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -10,7 +12,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.time.LocalDate;
-import java.util.Vector;
 import java.util.concurrent.ForkJoinPool;
 
 /**
@@ -19,8 +20,6 @@ import java.util.concurrent.ForkJoinPool;
  */
 
 public class Main extends Application {
-    /** Сама коллекция  */
-    static volatile Vector<Humans> collection = new Vector<>();
     static TextField name;
     static TextField character;
     static TextField location;
@@ -28,11 +27,13 @@ public class Main extends Application {
     static DatePicker picker;
     private static GridPane pane;
     private static Slider slider;
-    private static VBox addVBox;
     private static Button removeButton;
     private static Button generateButton;
 
     public static void main(String[] args) {
+        Commands.collection.addListener((ListChangeListener<Humans>) c ->
+                Platform.runLater(Main::updateList)
+        );
         try {
             launch();
         } catch (Exception e) {
@@ -44,7 +45,7 @@ public class Main extends Application {
     /** Метод для обновления отображаемой коллекции в случае её изменения*/
     private static void updateList () {
         TreeItem<String> tree = new TreeItem<>("Коллекция: ");
-        for (Humans humans : Main.collection) {
+        for (Humans humans : Commands.collection) {
             TreeItem<String> item =
                     new TreeItem<>(humans.getName());
             item.getChildren().add(new TreeItem<>(humans.toString()));
@@ -52,15 +53,14 @@ public class Main extends Application {
         }
         tree.setExpanded(true);
         TreeView<String> view = new TreeView<>(tree);
-        view.setMinWidth(700);
-        view.setMaxHeight(addVBox.getHeight());
-        view.setMinHeight(addVBox.getHeight());
+        view.setPrefWidth(700);
+        view.setPrefHeight(pane.getHeight());
         pane.add(view, 0, 0);
         slider.setMinWidth(pane.getWidth()
                 - removeButton.getWidth()
                 - generateButton.getWidth());
-        slider.setMax(collection.size());
-        if (slider.getMax() == 0) {
+        slider.setMax(Commands.collection.size());
+        if (slider.getMax() < 3) {
             slider.setMin(1);
             slider.setMax(5);
         }
@@ -86,8 +86,9 @@ public class Main extends Application {
         final VBox rootNode = new VBox();
         final HBox sliderHBox = new HBox();
         pane = new GridPane();
-        slider = new Slider(1, collection.size(), 5);
-        addVBox = new VBox();
+        pane.setPrefHeight(300);
+        slider = new Slider(1, Commands.collection.size(), 5);
+        VBox addVBox = new VBox();
         name = new TextField();
         character = new TextField();
         location = new TextField();
@@ -141,6 +142,7 @@ public class Main extends Application {
         final HBox box = new HBox(relations, picker);
         addVBox.getChildren().addAll(new Label("Информация о новом элементе:"),
                 name, character, location, box);
+        addVBox.setPrefHeight(pane.getHeight());
         //элемент (0;0) добавляется в updateList()
         pane.add(addVBox, 1, 0);
 
@@ -154,27 +156,23 @@ public class Main extends Application {
                 picker.setValue(LocalDate.now());
         });
         final ForkJoinPool pool = new ForkJoinPool();
+        Runtime.getRuntime().addShutdownHook(new Thread(pool::shutdownNow));
         saveOption.setOnAction((event) -> {
             Runnable runnable = () -> System.err.println(Commands.save.doIt());
             pool.submit(runnable).join();
         });
         loadOption.setOnAction((event) -> {
             Runnable runnable = () -> System.err.println(Commands.load.doIt());
-            pool.submit(runnable).join();
-            updateList();
+            pool.submit(runnable);
         });
-        removeButton.setOnAction((event) -> {
-            System.err.println(Commands.remove.doIt((int) slider.getValue()));
-            updateList();
-        });
-        generateButton.setOnAction((event) -> {
-            System.err.println(Commands.generate.doIt((int) slider.getValue()));
-            updateList();
-        });
-        removeLastOption.setOnAction((event) -> {
-            System.err.println(Commands.remove.doIt(Main.collection.size()));
-            updateList();
-        });
+        removeButton.setOnAction((event) ->
+                System.err.println(Commands.remove.doIt((int) slider.getValue())));
+        generateButton.setOnAction((event) ->
+                System.err.println(Commands.generate.doIt((int) slider.getValue()))
+        );
+        removeLastOption.setOnAction((event) ->
+                System.err.println(Commands.remove.doIt(Commands.collection.size()))
+        );
         addOption.setOnAction((event) -> {
             if (name.getText().isEmpty() ||
                     character.getText().isEmpty() ||
@@ -185,13 +183,13 @@ public class Main extends Application {
                 dialogWindow("Ошибка", errText).showAndWait();
             } else {
                 System.err.println(Commands.add.doIt());
-                updateList();
             }
         });
         helpOption.setOnAction((event) -> dialogWindow("Справка", help).showAndWait());
 
         //отрисовываем
         loadOption.fire();
+        updateList();
         rootNode.autosize();
         primaryStage.setScene(new Scene(rootNode));
         primaryStage.setTitle("Лабораторная №6");
@@ -199,7 +197,6 @@ public class Main extends Application {
         primaryStage.sizeToScene();
         primaryStage.centerOnScreen();
         primaryStage.setResizable(false);
-        updateList();
         slider.requestFocus();
         primaryStage.setOnCloseRequest(event -> {
             saveOption.fire();
