@@ -74,7 +74,8 @@ public class Main extends Application {
         dialog.setTitle(header);
         dialog.setContentText(content);
         dialog.getDialogPane().getButtonTypes().add(ButtonType.FINISH);
-        //следующая строка честно похищена со StackOverflow для разбиения справки на строки
+        //следующая строка честно похищена со StackOverflow для разбиения
+        // диалогового окна на строки
         dialog.getDialogPane().getChildren().stream()
                 .filter(node -> node instanceof Label)
                 .forEach(node -> ((Label) node).setMinHeight(Region.USE_PREF_SIZE));
@@ -157,34 +158,29 @@ public class Main extends Application {
         });
         final ForkJoinPool pool = new ForkJoinPool();
         Runtime.getRuntime().addShutdownHook(new Thread(pool::shutdownNow));
-        saveOption.setOnAction((event) -> {
-            Runnable runnable = () -> System.err.println(Commands.save.doIt());
-            pool.submit(runnable).join();
-        });
-        loadOption.setOnAction((event) -> {
-            Runnable runnable = () -> System.err.println(Commands.load.doIt());
-            pool.submit(runnable);
-        });
-        removeButton.setOnAction((event) ->
-                System.err.println(Commands.remove.doIt((int) slider.getValue())));
-        generateButton.setOnAction((event) ->
-                System.err.println(Commands.generate.doIt((int) slider.getValue()))
-        );
-        removeLastOption.setOnAction((event) ->
-                System.err.println(Commands.remove.doIt(Commands.collection.size()))
-        );
-        addOption.setOnAction((event) -> {
+        Runnable saveRunnable = () -> System.err.println(Commands.save.doIt());
+        saveOption.setOnAction((event) -> pool.submit(saveRunnable));
+        Runnable loadRunnable = () -> System.err.println(Commands.load.doIt());
+        loadOption.setOnAction((event) -> pool.submit(loadRunnable));
+        Runnable removeRunnable = () -> System.err.println(Commands.remove.doIt((int) slider.getValue()));
+        removeButton.setOnAction((event) -> pool.submit(removeRunnable));
+        Runnable generateRunnable = () -> System.err.println(Commands.generate.doIt((int) slider.getValue()));
+        generateButton.setOnAction((event) -> pool.submit(generateRunnable));
+        Runnable removeLastRunnable = () -> System.err.println(Commands.remove.doIt(Commands.collection.size()));
+        removeLastOption.setOnAction((event) -> pool.submit(removeLastRunnable));
+        Runnable addRunnable = () -> {
             if (name.getText().isEmpty() ||
                     character.getText().isEmpty() ||
                     location.getText().isEmpty()) {
                 System.err.println("Пустые поля для ввода");
                 String errText = "Вы должны заполнить поля " + name.getPromptText() +
                         ", " + character.getPromptText() + ", " + location.getPromptText();
-                dialogWindow("Ошибка", errText).showAndWait();
+                Platform.runLater(() -> dialogWindow("Ошибка", errText).showAndWait());
             } else {
                 System.err.println(Commands.add.doIt());
             }
-        });
+        };
+        addOption.setOnAction((event) -> pool.submit(addRunnable));
         helpOption.setOnAction((event) -> dialogWindow("Справка", help).showAndWait());
 
         //отрисовываем
