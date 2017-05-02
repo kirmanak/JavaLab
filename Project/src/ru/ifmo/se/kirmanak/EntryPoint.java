@@ -43,7 +43,7 @@ class EntryPoint {
                     Interface.getView().getRoot().getChildren().setAll(set);
                 }
             }
-            Platform.runLater(Interface::updateList);
+            Platform.runLater(Interface::updateSlider);
         });
         Interface.draw(args);
     }

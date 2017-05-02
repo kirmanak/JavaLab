@@ -5,6 +5,8 @@ import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
@@ -67,7 +69,7 @@ public class Interface extends Application {
     /**
      * Метод для обновления размера слайдера в случае её изменения
      */
-    static void updateList() {
+    static void updateSlider() {
         slider.setMax(EntryPoint.getCollection().size());
         if (slider.getMax() < 3) {
             slider.setMin(1);
@@ -97,7 +99,6 @@ public class Interface extends Application {
         final HBox sliderHBox = new HBox();
         final VBox addVBox = new VBox();
         final GridPane pane = new GridPane();
-        pane.setPrefHeight(300);
         slider = new Slider(1, EntryPoint.getCollection().size(), 5);
         name = new TextField();
         character = new TextField();
@@ -108,12 +109,12 @@ public class Interface extends Application {
         picker.setConverter(new StringConverter<LocalDate>() {
             @Override
             public String toString(LocalDate object) {
-                return object.format(DateTimeFormatter.ISO_LOCAL_DATE);
+                return object.format(DateTimeFormatter.ISO_DATE);
             }
 
             @Override
             public LocalDate fromString(String string) {
-                return LocalDate.parse(string, DateTimeFormatter.ISO_LOCAL_DATE);
+                return LocalDate.parse(string, DateTimeFormatter.ISO_DATE);
             }
         });
 
@@ -163,12 +164,14 @@ public class Interface extends Application {
         relations.getItems().addAll(Relative.values());
         relations.setValue(Relative.sibling);
         final HBox box = new HBox(relations, picker);
+        final ImageView imageView = new ImageView(new Image("file:img.png"));
+        imageView.setFitHeight(384);
+        imageView.setFitWidth(313);
         addVBox.getChildren().addAll(new Label("Информация о новом элементе:"),
-                name, character, location, box);
-        addVBox.setPrefHeight(pane.getHeight());
-        //элемент (0;0) добавляется в updateList()
+                name, character, location, box, imageView);
         pane.add(addVBox, 1, 0);
 
+        //описание TreeView
         ObservableList<Humans> collection = EntryPoint.getCollection();
         for (int i = 1, collectionSize = collection.size(); i <= collectionSize; i++) {
             Humans humans = collection.get(i - 1);
@@ -176,7 +179,6 @@ public class Interface extends Application {
             view.getRoot().getChildren().add(item);
         }
         view.getRoot().setExpanded(true);
-        view.setPrefWidth(700);
         pane.add(view, 0, 0);
 
         rootNode.getChildren().addAll(menuBar, pane, sliderHBox);
@@ -221,14 +223,11 @@ public class Interface extends Application {
 
         //отрисовываем
         loadOption.fire();
-        updateList();
-        rootNode.autosize();
+        updateSlider();
         primaryStage.setScene(new Scene(rootNode));
         primaryStage.setTitle("Лабораторная №6");
         primaryStage.show();
-        primaryStage.sizeToScene();
         primaryStage.centerOnScreen();
-        primaryStage.setResizable(false);
         slider.requestFocus();
         slider.setPrefWidth(pane.getWidth()
                 - removeButton.getWidth()
