@@ -12,7 +12,6 @@ import java.util.Random;
 /**
  * Enumeration команд, использующихся в программе
  */
-@SuppressWarnings("unused")
 enum Commands {
     /** Удаляет элемент из коллекции */
     remove {

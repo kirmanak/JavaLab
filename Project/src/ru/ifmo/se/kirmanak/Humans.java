@@ -55,7 +55,7 @@ class Humans implements Comparable<Humans> {
 
     public String toString() {
         return this.getRelative().toString() + " " + this.getName() + " с " + this.getCharacter()
-                + " характером, который находится " + this.getLocation().toString() + " до "
+                + "\nхарактером, который находится\n" + this.getLocation().toString() + " до "
                 + this.getTime().format(DateTimeFormatter.ISO_LOCAL_DATE);
     }
 

@@ -20,7 +20,7 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 
 /**
- * EntryPoint, создающий графический интерфейс и обрабатывающий действия пользователя.
+ * Interface, создающий графический интерфейс и обрабатывающий действия пользователя.
  * Работает с файлом, записанным в переменную окружения под названием jsonFile.
  */
 
@@ -61,8 +61,7 @@ public class Interface extends Application {
         try {
             launch(args);
         } catch (Exception e) {
-            System.err.println("Я сломался");
-            System.err.println(e.getLocalizedMessage());
+            e.printStackTrace();
         }
     }
 
@@ -95,6 +94,7 @@ public class Interface extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+
         final VBox rootNode = new VBox();
         final HBox sliderHBox = new HBox();
         final VBox addVBox = new VBox();
@@ -164,7 +164,11 @@ public class Interface extends Application {
         relations.getItems().addAll(Relative.values());
         relations.setValue(Relative.sibling);
         final HBox box = new HBox(relations, picker);
-        final ImageView imageView = new ImageView(new Image("file:img.png"));
+        getClass().getResource("img.png");
+        final ImageView imageView =
+                new ImageView(new Image(
+                        "ru/ifmo/se/kirmanak/img.png", true
+                ));
         imageView.setFitHeight(384);
         imageView.setFitWidth(313);
         addVBox.getChildren().addAll(new Label("Информация о новом элементе:"),
@@ -224,10 +228,11 @@ public class Interface extends Application {
         //отрисовываем
         loadOption.fire();
         updateSlider();
-        primaryStage.setScene(new Scene(rootNode));
+        primaryStage.setScene(new Scene(rootNode, 571, 571));
         primaryStage.setTitle("Лабораторная №6");
         primaryStage.show();
         primaryStage.centerOnScreen();
+        primaryStage.setResizable(false);
         slider.requestFocus();
         slider.setPrefWidth(pane.getWidth()
                 - removeButton.getWidth()
