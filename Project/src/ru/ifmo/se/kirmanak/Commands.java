@@ -3,8 +3,6 @@ package ru.ifmo.se.kirmanak;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 import java.io.*;
 import java.time.DateTimeException;
@@ -24,8 +22,8 @@ enum Commands {
 
         public String doIt(int index) {
             index--;
-            if (index < collection.size() && index >= 0) {
-                collection.remove(index);
+            if (index < EntryPoint.getCollection().size() && index >= 0) {
+                EntryPoint.getCollection().remove(index);
                 return String.format("%d-й элемент удалён", index+1);
             } else {
                 return "Нет такого элемента.";
@@ -41,7 +39,7 @@ enum Commands {
         public synchronized String doIt() {
             try (PrintWriter pw = new PrintWriter(new File(jsonFile))) {
                 pw.flush();
-                gson.toJson(collection, pw);
+                gson.toJson(EntryPoint.getCollection(), pw);
             } catch (IOException | NullPointerException err) {
                 return "Файл вывода не найден. Не буду ничего писать. $jsonFile = " + jsonFile;
             }
@@ -59,7 +57,7 @@ enum Commands {
                 String read = br.readLine();
                 if (!(read == null || read.isEmpty())) {
                     try {
-                        collection.setAll(gson.fromJson(read, Collection.class));
+                        EntryPoint.getCollection().setAll(gson.fromJson(read, Collection.class));
                     } catch (JsonSyntaxException err) {
                         return "Ошибка чтения коллекции из файла.";
                     }
@@ -77,12 +75,12 @@ enum Commands {
         }
 
         public String doIt() {
-            String name = Main.name.getText().trim(),
-                    character = Main.character.getText().trim();
-            LocalDate time = Main.picker.getValue();
-            Relative relative = Main.relations.getValue();
-            Location location = new Location(Main.location.getText().trim());
-            collection.add(new Humans(name, character, location, time, relative));
+            String name = Interface.getName().getText().trim(),
+                    character = Interface.getCharacter().getText().trim();
+            LocalDate time = Interface.getPicker().getValue();
+            Relative relative = Interface.getRelations().getValue();
+            Location location = new Location(Interface.getLocation().getText().trim());
+            EntryPoint.getCollection().add(new Humans(name, character, location, time, relative));
             return "Новый человек добавлен в коллекцию.";
         }
     },
@@ -114,7 +112,7 @@ enum Commands {
         public String doIt(int amountOfElements) {
             if (amountOfElements >= 0 && amountOfElements <= 100) {
                 for (int i = 0; i < amountOfElements; i++) {
-                    collection.add(generate());
+                    EntryPoint.getCollection().add(generate());
                 }
                 return "Сгенерировал " + amountOfElements + " элементов.";
             } else {
@@ -123,11 +121,6 @@ enum Commands {
         }
     };
 
-    /**
-     * Сама коллекция
-     */
-    static final ObservableList<Humans> collection
-            = FXCollections.synchronizedObservableList(new Collection());
     /** Переменная с именем файла, в котором хранится коллекция */
     private static final String jsonFile = System.getenv("jsonFile");
     /** Служебная переменная для работы с файлом */

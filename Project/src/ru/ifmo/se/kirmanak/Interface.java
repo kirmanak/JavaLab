@@ -2,7 +2,7 @@ package ru.ifmo.se.kirmanak;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -10,56 +10,65 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
 
 /**
  * EntryPoint, создающий графический интерфейс и обрабатывающий действия пользователя.
  * Работает с файлом, записанным в переменную окружения под названием jsonFile.
  */
 
-public class Main extends Application {
-    static TextField name;
-    static TextField character;
-    static TextField location;
-    static ChoiceBox<Relative> relations;
-    static DatePicker picker;
-    private static GridPane pane;
+public class Interface extends Application {
+    private static TextField name;
+    private static TextField character;
+    private static TextField location;
+    private static ChoiceBox<Relative> relations;
+    private static DatePicker picker;
+    private static TreeView<String> view;
     private static Slider slider;
-    private static Button removeButton;
-    private static Button generateButton;
 
-    public static void main(String[] args) {
-        Commands.collection.addListener((ListChangeListener<Humans>) c ->
-                Platform.runLater(Main::updateList)
-        );
+    static TextField getName() {
+        return name;
+    }
+
+    static TextField getCharacter() {
+        return character;
+    }
+
+    static TextField getLocation() {
+        return location;
+    }
+
+    static ChoiceBox<Relative> getRelations() {
+        return relations;
+    }
+
+    static DatePicker getPicker() {
+        return picker;
+    }
+
+    static TreeView<String> getView() {
+        return view;
+    }
+
+    static void draw(String[] args) {
         try {
-            launch();
+            launch(args);
         } catch (Exception e) {
             System.err.println("Я сломался");
-            e.printStackTrace(System.err);
+            System.err.println(e.getLocalizedMessage());
         }
     }
 
-    /** Метод для обновления отображаемой коллекции в случае её изменения*/
-    private static void updateList () {
-        TreeItem<String> tree = new TreeItem<>("Коллекция: ");
-        for (Humans humans : Commands.collection) {
-            TreeItem<String> item =
-                    new TreeItem<>(humans.getName());
-            item.getChildren().add(new TreeItem<>(humans.toString()));
-            tree.getChildren().add(item);
-        }
-        tree.setExpanded(true);
-        TreeView<String> view = new TreeView<>(tree);
-        view.setPrefWidth(700);
-        view.setPrefHeight(pane.getHeight());
-        pane.add(view, 0, 0);
-        slider.setMinWidth(pane.getWidth()
-                - removeButton.getWidth()
-                - generateButton.getWidth());
-        slider.setMax(Commands.collection.size());
+    /**
+     * Метод для обновления размера слайдера в случае её изменения
+     */
+    static void updateList() {
+        slider.setMax(EntryPoint.getCollection().size());
         if (slider.getMax() < 3) {
             slider.setMin(1);
             slider.setMax(5);
@@ -86,15 +95,27 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception {
         final VBox rootNode = new VBox();
         final HBox sliderHBox = new HBox();
-        pane = new GridPane();
+        final VBox addVBox = new VBox();
+        final GridPane pane = new GridPane();
         pane.setPrefHeight(300);
-        slider = new Slider(1, Commands.collection.size(), 5);
-        VBox addVBox = new VBox();
+        slider = new Slider(1, EntryPoint.getCollection().size(), 5);
         name = new TextField();
         character = new TextField();
         location = new TextField();
         relations = new ChoiceBox<>();
+        view = new TreeView<>(new TreeItem<>("Коллекция:"));
         picker = new DatePicker(LocalDate.now());
+        picker.setConverter(new StringConverter<LocalDate>() {
+            @Override
+            public String toString(LocalDate object) {
+                return object.format(DateTimeFormatter.ISO_LOCAL_DATE);
+            }
+
+            @Override
+            public LocalDate fromString(String string) {
+                return LocalDate.parse(string, DateTimeFormatter.ISO_LOCAL_DATE);
+            }
+        });
 
         //для remover'а и генератора
         slider.setShowTickMarks(true);
@@ -102,15 +123,16 @@ public class Main extends Application {
         slider.setMajorTickUnit(1);
         slider.setMinorTickCount(0);
         slider.setSnapToTicks(true);
-        removeButton = new Button("Удалить");
-        generateButton = new Button("Сгенерировать");
+        final Button removeButton = new Button("Удалить");
+        final Button generateButton = new Button("Сгенерировать");
         sliderHBox.getChildren().addAll(slider, removeButton, generateButton);
 
         //для меню
         final Menu fileMenu = new Menu("Файл");
         final MenuItem saveOption = new MenuItem("Сохранить");
         final MenuItem loadOption = new MenuItem("Загрузить");
-        fileMenu.getItems().addAll(loadOption, saveOption);
+        final MenuItem exitOption = new MenuItem("Выход");
+        fileMenu.getItems().addAll(loadOption, saveOption, exitOption);
         final Menu optionsMenu = new Menu("Операции");
         final MenuItem removeLastOption = new MenuItem("Удалить последнего");
         final MenuItem addOption = new MenuItem("Добавить нового");
@@ -147,41 +169,55 @@ public class Main extends Application {
         //элемент (0;0) добавляется в updateList()
         pane.add(addVBox, 1, 0);
 
+        ObservableList<Humans> collection = EntryPoint.getCollection();
+        for (int i = 1, collectionSize = collection.size(); i <= collectionSize; i++) {
+            Humans humans = collection.get(i - 1);
+            TreeItem<String> item = humans.toTreeItem(i);
+            view.getRoot().getChildren().add(item);
+        }
+        view.getRoot().setExpanded(true);
+        view.setPrefWidth(700);
+        pane.add(view, 0, 0);
+
         rootNode.getChildren().addAll(menuBar, pane, sliderHBox);
 
         //описание setOnAction-ов
+        final ForkJoinPool pool = new ForkJoinPool();
+        Runnable saveRunnable = () ->
+                System.err.println(Commands.save.doIt());
+        Runnable loadRunnable = () ->
+                System.err.println(Commands.load.doIt());
+        saveOption.setOnAction((event) ->
+                pool.submit(saveRunnable));
+        loadOption.setOnAction((event) ->
+                pool.submit(loadRunnable));
+        exitOption.setOnAction((event) ->
+                Platform.exit());
+        removeButton.setOnAction((event) ->
+                System.err.println(Commands.remove.doIt((int) slider.getValue())));
+        generateButton.setOnAction((event) ->
+                System.err.println(Commands.generate.doIt((int) slider.getValue())));
+        removeLastOption.setOnAction((event) ->
+                System.err.println(Commands.remove.doIt(EntryPoint.getCollection().size())));
+        helpOption.setOnAction((event) -> dialogWindow("Справка", help).showAndWait());
         picker.setOnAction((event) -> {
             //нельзя установить дату грядущего возвращения ранее,
             //чем сегодня
             if (picker.getValue() == null || picker.getValue().toEpochDay() < LocalDate.now().toEpochDay())
                 picker.setValue(LocalDate.now());
         });
-        final ForkJoinPool pool = new ForkJoinPool();
-        Runtime.getRuntime().addShutdownHook(new Thread(pool::shutdownNow));
-        Runnable saveRunnable = () -> System.err.println(Commands.save.doIt());
-        saveOption.setOnAction((event) -> pool.submit(saveRunnable));
-        Runnable loadRunnable = () -> System.err.println(Commands.load.doIt());
-        loadOption.setOnAction((event) -> pool.submit(loadRunnable));
-        Runnable removeRunnable = () -> System.err.println(Commands.remove.doIt((int) slider.getValue()));
-        removeButton.setOnAction((event) -> pool.submit(removeRunnable));
-        Runnable generateRunnable = () -> System.err.println(Commands.generate.doIt((int) slider.getValue()));
-        generateButton.setOnAction((event) -> pool.submit(generateRunnable));
-        Runnable removeLastRunnable = () -> System.err.println(Commands.remove.doIt(Commands.collection.size()));
-        removeLastOption.setOnAction((event) -> pool.submit(removeLastRunnable));
-        Runnable addRunnable = () -> {
+        addOption.setOnAction((event) -> {
             if (name.getText().isEmpty() ||
                     character.getText().isEmpty() ||
                     location.getText().isEmpty()) {
                 System.err.println("Пустые поля для ввода");
                 String errText = "Вы должны заполнить поля " + name.getPromptText() +
                         ", " + character.getPromptText() + ", " + location.getPromptText();
-                Platform.runLater(() -> dialogWindow("Ошибка", errText).showAndWait());
+                dialogWindow("Ошибка", errText).showAndWait();
             } else {
                 System.err.println(Commands.add.doIt());
             }
-        };
-        addOption.setOnAction((event) -> pool.submit(addRunnable));
-        helpOption.setOnAction((event) -> dialogWindow("Справка", help).showAndWait());
+        });
 
         //отрисовываем
         loadOption.fire();
@@ -194,9 +230,19 @@ public class Main extends Application {
         primaryStage.centerOnScreen();
         primaryStage.setResizable(false);
         slider.requestFocus();
-        primaryStage.setOnCloseRequest(event -> {
+        slider.setPrefWidth(pane.getWidth()
+                - removeButton.getWidth()
+                - generateButton.getWidth());
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             saveOption.fire();
+            System.err.println("Ожидаю сохранения данных в файл...");
             pool.shutdown();
-        });
+            try {
+                if (!pool.awaitTermination(10, TimeUnit.SECONDS))
+                    System.err.println("Слишком долгая запись, аварийное завершение");
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }));
     }
 }

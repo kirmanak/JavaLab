@@ -1,5 +1,7 @@
 package ru.ifmo.se.kirmanak;
 
+import javafx.scene.control.TreeItem;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 /** Отношения людей с Малышом */
@@ -31,30 +33,37 @@ class Humans implements Comparable<Humans> {
         this.time = time;
     }
 
-    public String getName() {
+    String getName() {
         return this.name;
     }
 
-    public Relative getRelative() {
+    Relative getRelative() {
         return this.relative;
     }
 
-    public LocalDate getTime() {
+    LocalDate getTime() {
         return this.time;
     }
 
-    public String getCharacter() {
+    String getCharacter() {
         return this.character;
     }
 
-    public Location getLocation() {
+    Location getLocation() {
         return this.location;
     }
 
     public String toString() {
         return this.getRelative().toString() + " " + this.getName() + " с " + this.getCharacter()
                 + " характером, который находится " + this.getLocation().toString() + " до "
-                + this.getTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+                + this.getTime().format(DateTimeFormatter.ISO_LOCAL_DATE);
+    }
+
+    TreeItem<String> toTreeItem(int j) {
+        TreeItem<String> item =
+                new TreeItem<>(j + ". " + this.getName());
+        item.getChildren().add(new TreeItem<>(this.toString()));
+        return item;
     }
 
     public int hashCode () {
