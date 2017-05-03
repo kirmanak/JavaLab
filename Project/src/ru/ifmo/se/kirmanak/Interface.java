@@ -33,30 +33,35 @@ public class Interface extends Application {
     private static TreeView<String> view;
     private static Slider slider;
 
-    static TextField getName() {
-        return name;
+    static String getName() {
+        return name.getText().trim();
     }
 
-    static TextField getCharacter() {
-        return character;
+    static String getCharacter() {
+        return character.getText().trim();
     }
 
-    static TextField getLocation() {
-        return location;
+    static String getLocation() {
+        return location.getText().trim();
     }
 
-    static ChoiceBox<Relative> getRelations() {
-        return relations;
+    static Relative getRelative() {
+        return relations.getValue();
     }
 
-    static DatePicker getPicker() {
-        return picker;
+    static LocalDate getDate() {
+        return picker.getValue();
     }
 
     static TreeView<String> getView() {
         return view;
     }
 
+    /**
+     * Рисует интерфейс
+     *
+     * @param args аргументы для метода launch(String[] args)
+     */
     static void draw(String[] args) {
         try {
             launch(args);
@@ -94,7 +99,6 @@ public class Interface extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-
         final VBox rootNode = new VBox();
         final HBox sliderHBox = new HBox();
         final VBox addVBox = new VBox();

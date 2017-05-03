@@ -74,11 +74,11 @@ enum Commands {
         }
 
         public String doIt() {
-            String name = Interface.getName().getText().trim(),
-                    character = Interface.getCharacter().getText().trim();
-            LocalDate time = Interface.getPicker().getValue();
-            Relative relative = Interface.getRelations().getValue();
-            Location location = new Location(Interface.getLocation().getText().trim());
+            String name = Interface.getName(),
+                    character = Interface.getCharacter();
+            LocalDate time = Interface.getDate();
+            Relative relative = Interface.getRelative();
+            Location location = new Location(Interface.getLocation());
             EntryPoint.getCollection().add(new Humans(name, character, location, time, relative));
             return "Новый человек добавлен в коллекцию.";
         }

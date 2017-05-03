@@ -34,13 +34,13 @@ class EntryPoint {
                     }
                 }
                 if (c.wasRemoved()) {
-                    ArrayList<TreeItem<String>> set = new ArrayList<>();
+                    List<TreeItem<String>> list = new ArrayList<>();
                     for (int i = 1, collectionSize = collection.size(); i <= collectionSize; i++) {
                         Humans humans = collection.get(i - 1);
                         TreeItem<String> item = humans.toTreeItem(i);
-                        set.add(item);
+                        list.add(item);
                     }
-                    Interface.getView().getRoot().getChildren().setAll(set);
+                    Interface.getView().getRoot().getChildren().setAll(list);
                 }
             }
             Platform.runLater(Interface::updateSlider);
