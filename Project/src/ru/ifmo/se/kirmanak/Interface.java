@@ -237,6 +237,7 @@ public class Interface extends Application {
         primaryStage.show();
         primaryStage.centerOnScreen();
         primaryStage.setResizable(false);
+        primaryStage.setFullScreen(false);
         slider.requestFocus();
         slider.setPrefWidth(pane.getWidth()
                 - removeButton.getWidth()
