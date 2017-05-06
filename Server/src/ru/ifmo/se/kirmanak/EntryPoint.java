@@ -7,10 +7,13 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
 import org.postgresql.ds.PGConnectionPoolDataSource;
 
+import java.io.IOException;
+import java.nio.channels.DatagramChannel;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
 
 class EntryPoint {
     private static final String dbUser = "postgres";
@@ -18,16 +21,31 @@ class EntryPoint {
     private static final String dbHost = "localhost";
     private static final String dbName = "humans";
     private static final String dbTableName = "human";
-
-    public static String getDbTableName() {
-        return dbTableName;
-    }
-
+    private static final ForkJoinPool pool = new ForkJoinPool();
+    private static final int port = 6666;
     /**
      * Сама коллекция
      */
     private static final ObservableList<Humans> collection
             = FXCollections.synchronizedObservableList(new Collection());
+    private static DatagramChannel serverChannel;
+    private static ServerThread serverThread;
+
+    public static ServerThread getServerThread() {
+        return serverThread;
+    }
+
+    public static DatagramChannel getServerChannel() {
+        return serverChannel;
+    }
+
+    public static ForkJoinPool getPool() {
+        return pool;
+    }
+
+    public static String getDbTableName() {
+        return dbTableName;
+    }
 
     static ObservableList<Humans> getCollection() {
         return collection;
@@ -44,7 +62,12 @@ class EntryPoint {
         return connection;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        serverChannel = DatagramChannel.open();
+        serverThread = new ServerThread(port);
+        Thread serverDaemon = new Thread(serverThread);
+        serverDaemon.setDaemon(true);
+        serverDaemon.start();
         collection.addListener((ListChangeListener<Humans>) c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
@@ -56,6 +79,9 @@ class EntryPoint {
                         TreeItem<String> item = humans.toTreeItem(j);
                         Interface.getView().getRoot().getChildren().add(item);
                     }
+                    Message message = new Message(true, new ArrayList<>(EntryPoint.getCollection()));
+                    System.out.println("Сформировал новое сообщение после добавления...");
+                    getServerThread().sendMessageToAll(message);
                 }
                 if (c.wasRemoved()) {
                     List<TreeItem<String>> list = new ArrayList<>();
@@ -65,15 +91,13 @@ class EntryPoint {
                         list.add(item);
                     }
                     Interface.getView().getRoot().getChildren().setAll(list);
+                    Message message = new Message(true, new ArrayList<>(EntryPoint.getCollection()));
+                    System.out.println("Сформировал новое сообщение после удаления...");
+                    getServerThread().sendMessageToAll(message);
                 }
             }
             Platform.runLater(Interface::updateSlider);
         });
-        try {
-            getConnection().close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
         Interface.draw(args);
     }
 }

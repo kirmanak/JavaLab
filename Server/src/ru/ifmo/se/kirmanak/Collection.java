@@ -2,9 +2,10 @@ package ru.ifmo.se.kirmanak;
 
 import javafx.collections.ModifiableObservableListBase;
 
+import java.io.Serializable;
 import java.util.Vector;
 
-class Collection extends ModifiableObservableListBase<Humans> {
+class Collection extends ModifiableObservableListBase<Humans> implements Serializable {
     private final Vector<Humans> delegate = new Vector<>();
 
     @Override

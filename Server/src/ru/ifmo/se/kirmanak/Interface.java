@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
  */
 
 public class Interface extends Application {
+    private static final String title = "Лабораторная №7 (сервер)";
     private static TextField name;
     private static TextField character;
     private static TextField location;
@@ -191,7 +192,7 @@ public class Interface extends Application {
         rootNode.getChildren().addAll(menuBar, pane, sliderHBox);
 
         //описание setOnAction-ов
-        final ForkJoinPool pool = new ForkJoinPool();
+        final ForkJoinPool pool = EntryPoint.getPool();
         Runnable saveRunnable = () ->
                 System.err.println(Commands.save.doIt());
         Runnable loadRunnable = () ->
@@ -232,7 +233,7 @@ public class Interface extends Application {
         loadOption.fire();
         updateSlider();
         primaryStage.setScene(new Scene(rootNode, 571, 571));
-        primaryStage.setTitle("Лабораторная №6");
+        primaryStage.setTitle(title);
         primaryStage.show();
         primaryStage.centerOnScreen();
         primaryStage.setResizable(false);

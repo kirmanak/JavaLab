@@ -1,9 +1,11 @@
 package ru.ifmo.se.kirmanak;
 
+import java.io.Serializable;
+
 /**
  * Местонахождение человека
  */
-class Location {
+class Location implements Serializable {
     /** Имя локации */
     private final String name;
 

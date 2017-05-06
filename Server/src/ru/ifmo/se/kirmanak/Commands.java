@@ -34,10 +34,10 @@ enum Commands {
     /** Записывает коллекцию в базу данных. */
     save {
         public String toString() {
-            return "Сохранить коллекцию в базу данных.\n";
+            return "Сохранить коллекцию.\n";
         }
 
-        public String doIt() {
+        public synchronized String doIt() {
             PreparedStatement ps = null;
             Connection connection = null;
             Savepoint savepoint = null;
@@ -45,13 +45,16 @@ enum Commands {
                 connection = EntryPoint.getConnection();
                 connection.setAutoCommit(false);
                 savepoint = connection.setSavepoint();
+                String tableName = EntryPoint.getDbTableName();
                 ps = connection.prepareStatement(
-                        "INSERT INTO "+EntryPoint.getDbTableName()
-                                +"(hashcode, name, relative, time, character, location) " +
+                        "INSERT INTO " + tableName + "(hashcode, name, " +
+                                "relative, time, character, location) " +
                                 "VALUES (?,?,?::relative,?::date,?,?) ON CONFLICT DO NOTHING;"
                 );
+                connection.createStatement().execute("DELETE FROM HUMAN *;");
                 ObservableList<Humans> collection = EntryPoint.getCollection();
-                for (Humans humans : collection) {
+                for (int i = 0, collectionSize = collection.size(); i < collectionSize; i++) {
+                    Humans humans = collection.get(i);
                     ps.setInt(1, humans.hashCode());
                     ps.setString(2, humans.getName());
                     ps.setString(3, humans.getRelative().name());
@@ -59,8 +62,9 @@ enum Commands {
                     ps.setString(5, humans.getCharacter());
                     ps.setString(6, humans.getLocation().toString());
                     ps.executeUpdate();
-                    connection.commit();
+
                 }
+                connection.commit();
                 return "Запись выполнена успешно";
             } catch (SQLException e) {
                 try {
@@ -90,7 +94,7 @@ enum Commands {
             return "Cчитать коллекцию из базы данных.\n";
         }
 
-        public String doIt() {
+        public synchronized String doIt() {
             try (Connection connection = EntryPoint.getConnection()) {
                 Statement statement = connection.createStatement();
                 ResultSet set = statement.executeQuery(
@@ -129,7 +133,8 @@ enum Commands {
             LocalDate time = Interface.getDate();
             Relative relative = Interface.getRelative();
             Location location = new Location(Interface.getLocation());
-            EntryPoint.getCollection().add(new Humans(name, character, location, time, relative));
+            Humans human = new Humans(name, character, location, time, relative);
+            EntryPoint.getCollection().add(human);
             return "Новый человек добавлен в коллекцию.";
         }
     },
@@ -160,9 +165,11 @@ enum Commands {
 
         public String doIt(int amountOfElements) {
             if (amountOfElements >= 0 && amountOfElements <= 100) {
+                List<Humans> generatedList = new ArrayList<>();
                 for (int i = 0; i < amountOfElements; i++) {
-                    EntryPoint.getCollection().add(generate());
+                    generatedList.add(generate());
                 }
+                EntryPoint.getCollection().addAll(generatedList);
                 return "Сгенерировал " + amountOfElements + " элементов.";
             } else {
                 return "Кажется, ты ошибся в количестве элементов. Я работаю с числами в диапозоне [0;100].";

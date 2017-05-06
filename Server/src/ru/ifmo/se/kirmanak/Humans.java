@@ -6,7 +6,8 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 /** Отношения людей с Малышом */
-class Humans implements Comparable<Humans>, Serializable {
+class Humans implements Serializable {
+    private static int nextId = 1;
     /** Имя */
     private final String name;
     /** Характер */
@@ -17,7 +18,6 @@ class Humans implements Comparable<Humans>, Serializable {
     private final LocalDate time;
     /** Место, в котором находится человек */
     private final Location location;
-    private static int nextId=1;
     private final int id;
 
     public Humans(String name, String character, Relative relative, LocalDate time, Location location, int id) {
@@ -49,26 +49,27 @@ class Humans implements Comparable<Humans>, Serializable {
         nextId++;
     }
 
-    String getName() {
+    public String getName() {
         return this.name;
     }
 
-    Relative getRelative() {
+    public Relative getRelative() {
         return this.relative;
     }
 
-    LocalDate getTime() {
+    public LocalDate getTime() {
         return this.time;
     }
 
-    String getCharacter() {
+    public String getCharacter() {
         return this.character;
     }
 
-    Location getLocation() {
+    public Location getLocation() {
         return this.location;
     }
 
+    @Override
     public String toString() {
         return this.getRelative().toString() + " " + this.getName() + " с " + this.getCharacter()
                 + "\nхарактером, который находится\n" + this.getLocation().toString() + " до "
@@ -82,12 +83,18 @@ class Humans implements Comparable<Humans>, Serializable {
         return item;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj.getClass().equals(this.getClass())) {
+            Humans humans = (Humans) obj;
+            return this.id == humans.id && this.name.equals(humans.name) && this.character.equals(humans.character)
+                    && this.relative.equals(humans.relative) && this.location.equals(humans.location) && this.time.equals(humans.time);
+        } else return false;
+    }
+
+    @Override
     public int hashCode () {
         return this.id;
     }
 
-    @Override
-    public int compareTo(Humans adult) {
-        return this.toString().compareTo(adult.toString());
-    }
 }
